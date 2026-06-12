@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Escape Tool - Dev Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu-item {
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-menu-item:hover {
+            transform: translateX(4px);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .sidebar-menu-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .sidebar-menu-item.active i {
+            color: white;
+        }
+
+        .code-output {
+            font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.1;
+            }
+
+            90% {
+                opacity: 0.1;
+            }
+
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 100;
+        }
+
+        .copy-success {
+            animation: copySuccess 2s ease-in-out;
+        }
+
+        @keyframes copySuccess {
+            0% {
+                background-color: #10b981;
+            }
+
+            100% {
+                background-color: #6366f1;
+            }
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-mobile {
+                transform: translateX(-100%);
+            }
+
+            .sidebar-mobile.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Floating Background Elements -->
+    <div class="floating-elements">
+        <div class="floating-element gradient-bg w-20 h-20 rounded-full" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-element gradient-bg w-12 h-12 rounded-full" style="left: 20%; animation-delay: 5s;"></div>
+        <div class="floating-element gradient-bg w-16 h-16 rounded-full" style="left: 30%; animation-delay: 10s;"></div>
+        <div class="floating-element gradient-bg w-8 h-8 rounded-full" style="left: 40%; animation-delay: 15s;"></div>
+        <div class="floating-element gradient-bg w-24 h-24 rounded-full" style="left: 60%; animation-delay: 3s;"></div>
+        <div class="floating-element gradient-bg w-14 h-14 rounded-full" style="left: 70%; animation-delay: 8s;"></div>
+        <div class="floating-element gradient-bg w-10 h-10 rounded-full" style="left: 80%; animation-delay: 12s;"></div>
+        <div class="floating-element gradient-bg w-18 h-18 rounded-full" style="left: 90%; animation-delay: 7s;"></div>
+    </div>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg sidebar-transition fixed md:relative z-20 h-full sidebar-mobile"
+            id="sidebar">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                        <i class="fas fa-code text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">Dev Tools</h1>
+                        <p class="text-xs text-gray-500">45+ Developer Utilities</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="p-4">
+                <div class="relative">
+                    <input type="text" placeholder="Search tools..."
+                        class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        id="toolSearch">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- Menu Categories -->
+            <nav class="flex-1 overflow-y-auto custom-scrollbar">
+                <!-- Text Tools -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Text Tools</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item active flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-quote-right w-5 text-purple-500 mr-3"></i>
+                                Text Escape
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-text-width w-5 text-purple-500 mr-3"></i>
+                                Case Converter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-paragraph w-5 text-purple-500 mr-3"></i>
+                                Lorem Ipsum
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-align-left w-5 text-purple-500 mr-3"></i>
+                                Text Formatter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Formatters -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Formatters</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-code w-5 text-purple-500 mr-3"></i>
+                                JSON Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-file-code w-5 text-purple-500 mr-3"></i>
+                                XML Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-database w-5 text-purple-500 mr-3"></i>
+                                SQL Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fab fa-css3-alt w-5 text-purple-500 mr-3"></i>
+                                CSS Formatter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Generators -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Generators</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-lock w-5 text-purple-500 mr-3"></i>
+                                Password Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-fingerprint w-5 text-purple-500 mr-3"></i>
+                                UUID Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-palette w-5 text-purple-500 mr-3"></i>
+                                Color Generator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Converters -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Converters</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-exchange-alt w-5 text-purple-500 mr-3"></i>
+                                Base64 Encoder
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-clock w-5 text-purple-500 mr-3"></i>
+                                UNIX Timestamp
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-hashtag w-5 text-purple-500 mr-3"></i>
+                                Hash Generator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Testers -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Testers</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-search w-5 text-purple-500 mr-3"></i>
+                                Regex Tester
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-link w-5 text-purple-500 mr-3"></i>
+                                URL Validator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden hidden" id="sidebarOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button class="md:hidden text-gray-600 hover:text-purple-600" id="sidebarToggle">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">Text Escape Tool</h2>
+                            <p class="text-sm text-gray-500">Escape and unescape text for various programming languages
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button class="text-gray-600 hover:text-purple-600 transition-colors"
+                            onclick="window.location.href='#'">
+                            <i class="fas fa-home text-lg"></i>
+                        </button>
+                        <button class="text-gray-600 hover:text-purple-600 transition-colors" onclick="shareURL()">
+                            <i class="fas fa-share-alt text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tool Content -->
+            <div class="flex-1 overflow-auto p-6 space-y-6">
+                <!-- Tool Description -->
+                <div class="tool-card rounded-xl p-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-quote-right text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">About Text Escape Tool</h3>
+                            <p class="text-gray-600 leading-relaxed">
+                                This tool helps you escape and unescape text for various programming languages and
+                                formats.
+                                Whether you need to prepare strings for JSON, HTML, JavaScript, C#, Java, or other
+                                languages,
+                                this tool handles the conversion automatically.
+                            </p>
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span
+                                    class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">JSON</span>
+                                <span
+                                    class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">HTML</span>
+                                <span
+                                    class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">JavaScript</span>
+                                <span
+                                    class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">C#</span>
+                                <span
+                                    class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">Java</span>
+                                <span
+                                    class="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded-full">URL</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tool Interface -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Input Section -->
+                    <div class="tool-card rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-gray-900">Input Text</h4>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="clearInput()"
+                                    class="px-3 py-1 text-sm text-gray-600 hover:text-red-600 transition-colors">
+                                    <i class="fas fa-trash mr-1"></i>Clear
+                                </button>
+                                <button onclick="pasteFromClipboard()"
+                                    class="px-3 py-1 text-sm text-gray-600 hover:text-purple-600 transition-colors">
+                                    <i class="fas fa-paste mr-1"></i>Paste
+                                </button>
+                            </div>
+                        </div>
+
+                        <textarea id="inputText" placeholder="Enter your text here to escape or unescape..."
+                            class="w-full h-64 p-4 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            oninput="processText()"></textarea>
+
+                        <div class="flex items-center justify-between mt-4">
+                            <span class="text-sm text-gray-500">
+                                Characters: <span id="inputCount">0</span>
+                            </span>
+                            <div class="flex items-center space-x-2">
+                                <label class="text-sm text-gray-600">Mode:</label>
+                                <select id="escapeMode" onchange="processText()"
+                                    class="px-3 py-1 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    <option value="json">JSON</option>
+                                    <option value="html">HTML</option>
+                                    <option value="javascript">JavaScript</option>
+                                    <option value="csharp">C#</option>
+                                    <option value="java">Java</option>
+                                    <option value="url">URL</option>
+                                    <option value="xml">XML</option>
+                                    <option value="csv">CSV</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Output Section -->
+                    <div class="tool-card rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-gray-900">Escaped Output</h4>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="copyOutput()"
+                                    class="tooltip px-3 py-1 text-sm gradient-bg text-white rounded-lg hover:opacity-90 transition-opacity"
+                                    data-tooltip="Copy to clipboard" id="copyBtn">
+                                    <i class="fas fa-copy mr-1"></i>Copy
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="outputText"
+                            class="w-full h-64 p-4 code-output rounded-lg overflow-auto custom-scrollbar text-sm">
+                            <!-- Output will appear here -->
+                        </div>
+
+                        <div class="flex items-center justify-between mt-4">
+                            <span class="text-sm text-gray-500">
+                                Output characters: <span id="outputCount">0</span>
+                            </span>
+                            <div class="flex items-center space-x-4">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" id="showEscaped" checked onchange="processText()"
+                                        class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                                    <span class="text-sm text-gray-600">Show Escaped</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" id="showUnescaped" onchange="processText()"
+                                        class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                                    <span class="text-sm text-gray-600">Show Unescaped</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="tool-card rounded-xl p-6">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <button onclick="insertSample('json')"
+                            class="p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors text-center">
+                            <i class="fas fa-code text-purple-600 mb-2"></i>
+                            <div class="text-sm font-medium text-gray-900">JSON Sample</div>
+                        </button>
+                        <button onclick="insertSample('html')"
+                            class="p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors text-center">
+                            <i class="fab fa-html5 text-purple-600 mb-2"></i>
+                            <div class="text-sm font-medium text-gray-900">HTML Sample</div>
+                        </button>
+                        <button onclick="insertSample('javascript')"
+                            class="p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors text-center">
+                            <i class="fab fa-js-square text-purple-600 mb-2"></i>
+                            <div class="text-sm font-medium text-gray-900">JS Sample</div>
+                        </button>
+                        <button onclick="insertSample('sql')"
+                            class="p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors text-center">
+                            <i class="fas fa-database text-purple-600 mb-2"></i>
+                            <div class="text-sm font-medium text-gray-900">SQL Sample</div>
+                        </button>
+                        <button onclick="swapInputOutput()"
+                            class="p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors text-center">
+                            <i class="fas fa-exchange-alt text-purple-600 mb-2"></i>
+                            <div class="text-sm font-medium text-gray-900">Swap I/O</div>
+                        </button>
+                        <button onclick="downloadOutput()"
+                            class="p-4 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors text-center">
+                            <i class="fas fa-download text-purple-600 mb-2"></i>
+                            <div class="text-sm font-medium text-gray-900">Download</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Usage Examples -->
+                <div class="tool-card rounded-xl p-6">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4">Usage Examples</h4>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <h5 class="font-medium text-gray-900 mb-2">JSON String Escaping</h5>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <div class="text-gray-600 mb-1">Input:</div>
+                                    <code
+                                        class="block p-2 bg-white border rounded text-xs">Hello "World" and 'quotes'</code>
+                                </div>
+                                <div>
+                                    <div class="text-gray-600 mb-1">Output:</div>
+                                    <code
+                                        class="block p-2 bg-white border rounded text-xs">Hello \"World\" and 'quotes'</code>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <h5 class="font-medium text-gray-900 mb-2">HTML Entity Escaping</h5>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <div class="text-gray-600 mb-1">Input:</div>
+                                    <code
+                                        class="block p-2 bg-white border rounded text-xs">&lt;div&gt;Hello &amp; Welcome&lt;/div&gt;</code>
+                                </div>
+                                <div>
+                                    <div class="text-gray-600 mb-1">Output:</div>
+                                    <code
+                                        class="block p-2 bg-white border rounded text-xs">&amp;lt;div&amp;gt;Hello &amp;amp; Welcome&amp;lt;/div&amp;gt;</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Sample data for different formats
+        const samples = {
+            json: '{"name": "John Doe", "email": "john@example.com", "message": "Hello \"World\"!"}',
+            html: '<div class="container">\n  <h1>Welcome & Hello!</h1>\n  <p>This is a "sample" text with \'quotes\'.</p>\n</div>',
+            javascript: 'function greeting() {\n  console.log("Hello \\"World\\"!");\n  return \'Success\';\n}',
+            sql: 'SELECT * FROM users WHERE name = \'John O\'Brien\' AND status = "active";'
+        };
+
+        // Escaping functions for different formats
+        const escapers = {
+            json: {
+                escape: (text) => JSON.stringify(text).slice(1, -1),
+                unescape: (text) => {
+                    try {
+                        return JSON.parse('"' + text + '"');
+                    } catch {
+                        return text;
+                    }
+                }
+            },
+            html: {
+                escape: (text) => text
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;'),
+                unescape: (text) => text
+                    .replace(/&quot;/g, '"')
+                    .replace(/&#39;/g, "'")
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&amp;/g, '&')
+            },
+            javascript: {
+                escape: (text) => text
+                    .replace(/\\/g, '\\\\')
+                    .replace(/"/g, '\\"')
+                    .replace(/'/g, "\\'")
+                    .replace(/\n/g, '\\n')
+                    .replace(/\r/g, '\\r')
+                    .replace(/\t/g, '\\t'),
+                unescape: (text) => text
+                    .replace(/\\r/g, '\r')
+                    .replace(/\\n/g, '\n')
+                    .replace(/\\t/g, '\t')
+                    .replace(/\\'/g, "'")
+                    .replace(/\\"/g, '"')
+                    .replace(/\\\\/g, '\\')
+        }
+    }
+
+    function processText() {
+        const input = document.getElementById('inputText').value;
+        const mode = document.getElementById('escapeMode').value;
+        const showEscaped = document.getElementById('showEscaped').checked;
+        const showUnescaped = document.getElementById('showUnescaped').checked;
+        const inputCount = document.getElementById('inputCount');
+        const outputCount = document.getElementById('outputCount');
+        const outputEl = document.getElementById('outputText');
+
+        inputCount.textContent = input.length;
+
+        let result = '';
+        if (showEscaped && escapers[mode]) {
+            result += escapers[mode].escape(input);
+        }
+        if (showUnescaped && escapers[mode]) {
+            if (result) result += '\n\n--- Unescaped ---\n\n';
+            result += escapers[mode].unescape(input);
+        }
+
+        outputEl.textContent = result;
+        outputCount.textContent = result.length;
+    }
+
+    function copyOutput() {
+        const text = document.getElementById('outputText').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById('copyBtn');
+            btn.classList.add('copy-success');
+            setTimeout(() => btn.classList.remove('copy-success'), 2000);
+        });
+    }
+
+    function clearInput() {
+        document.getElementById('inputText').value = '';
+        processText();
+    }
+
+    function pasteFromClipboard() {
+        navigator.clipboard.readText().then(text => {
+            document.getElementById('inputText').value = text;
+            processText();
+        });
+    }
+
+    function insertSample(type) {
+        if (samples[type]) {
+            document.getElementById('inputText').value = samples[type];
+            processText();
+        }
+    }
+
+    function swapInputOutput() {
+        const inputEl = document.getElementById('inputText');
+        const outputEl = document.getElementById('outputText');
+        inputEl.value = outputEl.textContent;
+        processText();
+    }
+
+    function downloadOutput() {
+        const text = document.getElementById('outputText').textContent;
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'escaped-output.txt';
+        a.click();
+
+        URL.revokeObjectURL(url);
+    }
+
+    function shareURL() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('URL copied to clipboard!');
+        });
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+        processText();
+    });
+
+    // Sidebar mobile toggle
+    document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebarOverlay').classList.toggle('hidden');
+    });
+
+    document.getElementById('sidebarOverlay')?.addEventListener('click', () => {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.add('hidden');
+    });
+</script>

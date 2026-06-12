@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Diff Tool - Dev Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .sidebar-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        .sidebar-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+        
+        .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .diff-container {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+        
+        .line-number {
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+            color: #64748b;
+            user-select: none;
+        }
+        
+        .added-line {
+            background-color: #dcfce7;
+            border-left: 3px solid #16a34a;
+        }
+        
+        .removed-line {
+            background-color: #fef2f2;
+            border-left: 3px solid #dc2626;
+        }
+        
+        .unchanged-line {
+            background-color: #f8fafc;
+        }
+        
+        .sidebar-item {
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
+        }
+        
+        .sidebar-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-right: 3px solid #ffffff;
+        }
+        
+        .tool-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .diff-highlight {
+            background-color: #fbbf24;
+            color: #92400e;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+        
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .pulse-soft {
+            animation: pulse-soft 2s infinite;
+        }
+        
+        .split-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .split-view {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Mobile Menu Button -->
+    <button id="mobile-menu-btn" class="lg:hidden fixed top-4 left-4 z-50 bg-purple-600 text-white p-2 rounded-lg shadow-lg">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div id="sidebar" class="w-80 gradient-bg text-white shadow-2xl transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out fixed lg:relative z-40 h-full">
+            <div class="p-6 border-b border-white border-opacity-20">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-code text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Dev Tools</h1>
+                        <p class="text-purple-100 text-sm">45+ Developer Utilities</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto sidebar-scrollbar p-4">
+                <div class="space-y-2">
+                    <!-- Text Tools Category -->
+                    <div class="mb-4">
+                        <h3 class="text-purple-200 text-xs font-semibold uppercase tracking-wide mb-2 px-3">Text Tools</h3>
+                        <div class="space-y-1">
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-text-width text-purple-200 w-4"></i>
+                                <span class="text-sm">Case Converter</span>
+                            </a>
+                            <a href="#" class="sidebar-item active flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-not-equal text-purple-200 w-4"></i>
+                                <span class="text-sm">Text Diff</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-paragraph text-purple-200 w-4"></i>
+                                <span class="text-sm">Lorem Ipsum</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-quote-right text-purple-200 w-4"></i>
+                                <span class="text-sm">Text Escape</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Formatters Category -->
+                    <div class="mb-4">
+                        <h3 class="text-purple-200 text-xs font-semibold uppercase tracking-wide mb-2 px-3">Formatters</h3>
+                        <div class="space-y-1">
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-code text-purple-200 w-4"></i>
+                                <span class="text-sm">JSON Formatter</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-code text-purple-200 w-4"></i>
+                                <span class="text-sm">XML Formatter</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-database text-purple-200 w-4"></i>
+                                <span class="text-sm">SQL Formatter</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-file-code text-purple-200 w-4"></i>
+                                <span class="text-sm">HTML Formatter</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-paint-brush text-purple-200 w-4"></i>
+                                <span class="text-sm">CSS Formatter</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Converters Category -->
+                    <div class="mb-4">
+                        <h3 class="text-purple-200 text-xs font-semibold uppercase tracking-wide mb-2 px-3">Converters</h3>
+                        <div class="space-y-1">
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-exchange-alt text-purple-200 w-4"></i>
+                                <span class="text-sm">Base64 Encoder/Decoder</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-clock text-purple-200 w-4"></i>
+                                <span class="text-sm">UNIX Timestamp</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-palette text-purple-200 w-4"></i>
+                                <span class="text-sm">Color Converter</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-link text-purple-200 w-4"></i>
+                                <span class="text-sm">URL Encoder/Decoder</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Generators Category -->
+                    <div class="mb-4">
+                        <h3 class="text-purple-200 text-xs font-semibold uppercase tracking-wide mb-2 px-3">Generators</h3>
+                        <div class="space-y-1">
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-lock text-purple-200 w-4"></i>
+                                <span class="text-sm">Password Generator</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-fingerprint text-purple-200 w-4"></i>
+                                <span class="text-sm">UUID Generator</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-random text-purple-200 w-4"></i>
+                                <span class="text-sm">Random Data</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-hashtag text-purple-200 w-4"></i>
+                                <span class="text-sm">Hash Generator</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Validators Category -->
+                    <div class="mb-4">
+                        <h3 class="text-purple-200 text-xs font-semibold uppercase tracking-wide mb-2 px-3">Validators</h3>
+                        <div class="space-y-1">
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-search text-purple-200 w-4"></i>
+                                <span class="text-sm">Regex Tester</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-code text-purple-200 w-4"></i>
+                                <span class="text-sm">JSON Validator</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-file-code text-purple-200 w-4"></i>
+                                <span class="text-sm">XML Validator</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-envelope text-purple-200 w-4"></i>
+                                <span class="text-sm">Email Validator</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Utilities Category -->
+                    <div class="mb-4">
+                        <h3 class="text-purple-200 text-xs font-semibold uppercase tracking-wide mb-2 px-3">Utilities</h3>
+                        <div class="space-y-1">
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-qrcode text-purple-200 w-4"></i>
+                                <span class="text-sm">QR Code Generator</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-image text-purple-200 w-4"></i>
+                                <span class="text-sm">Image Optimizer</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-compress text-purple-200 w-4"></i>
+                                <span class="text-sm">Minifier</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-eye text-purple-200 w-4"></i>
+                                <span class="text-sm">Encoder Viewer</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer in sidebar -->
+            <div class="p-4 border-t border-white border-opacity-20">
+                <div class="text-center">
+                    <p class="text-purple-200 text-xs">© 2024 Dev Tools</p>
+                    <p class="text-purple-300 text-xs mt-1">Free Forever</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Overlay for mobile -->
+        <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden"></div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 lg:ml-0 overflow-auto">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center">
+                            <i class="fas fa-not-equal text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">Text Diff Tool</h1>
+                            <p class="text-gray-600">Compare and highlight differences between two text blocks</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <button id="clear-btn" class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-trash mr-2"></i>Clear All
+                        </button>
+                        <button id="swap-btn" class="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors">
+                            <i class="fas fa-exchange-alt mr-2"></i>Swap Texts
+                        </button>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Main Content Area -->
+            <main class="p-6 max-w-7xl mx-auto">
+                <!-- Options Panel -->
+                <div class="tool-card rounded-xl p-6 mb-6 shadow-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Comparison Options</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="ignore-case" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                            <label for="ignore-case" class="ml-2 text-sm text-gray-700">Ignore Case</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="ignore-whitespace" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                            <label for="ignore-whitespace" class="ml-2 text-sm text-gray-700">Ignore Whitespace</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="word-diff" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500" checked>
+                            <label for="word-diff" class="ml-2 text-sm text-gray-700">Word-level Diff</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Input Section -->
+                <div class="split-view mb-6">
+                    <div class="tool-card rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Original Text</h3>
+                            <div class="flex space-x-2">
+                                <button id="load-sample-1" class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors">
+                                    Load Sample
+                                </button>
+                                <button id="paste-1" class="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors">
+                                    <i class="fas fa-paste mr-1"></i>Paste
+                                </button>
+                            </div>
+                        </div>
+                        <textarea
+                            id="text1"
+                            class="w-full h-64 p-4 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="Enter your original text here..."
+                        ></textarea>
+                        <div class="mt-2 text-xs text-gray-500">
+                            <span>Lines: <span id="lines-1">0</span></span>
+                            <span class="ml-4">Characters: <span id="chars-1">0</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-card rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Modified Text</h3>
+                            <div class="flex space-x-2">
+                                <button id="load-sample-2" class="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors">
+                                    Load Sample
+                                </button>
+                                <button id="paste-2" class="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors">
+                                    <i class="fas fa-paste mr-1"></i>Paste
+                                </button>
+                            </div>
+                        </div>
+                        <textarea
+                            id="text2"
+                            class="w-full h-64 p-4 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            placeholder="Enter your modified text here..."
+                        ></textarea>
+                        <div class="mt-2 text-xs text-gray-500">
+                            <span>Lines: <span id="lines-2">0</span></span>
+                            <span class="ml-4">Characters: <span id="chars-2">0</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Compare Button -->
+                <div class="text-center mb-6">
+                    <button id="compare-btn" class="gradient-bg text-white px-8 py-3 rounded-xl font-semibold text-lg hover:opacity-90 transition-all transform hover:scale-105 shadow-lg">
+                        <i class="fas fa-search mr-2"></i>Compare Texts
+                    </button>
+                </div>
+                
+                <!-- Results Section -->
+                <div id="results-section" class="hidden">
+                    <!-- Stats -->
+                    <div class="tool-card rounded-xl p-6 mb-6 shadow-lg">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Comparison Results</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="text-center p-4 bg-green-50 rounded-lg">
+                                <div class="text-2xl font-bold text-green-600" id="added-count">0</div>
+                                <div class="text-sm text-green-700">Added Lines</div>
+                            </div>
+                            <div class="text-center p-4 bg-red-50 rounded-lg">
+                                <div class="text-2xl font-bold text-red-600" id="removed-count">0</div>
+                                <div class="text-sm text-red-700">Removed Lines</div>
+                            </div>
+                            <div class="text-center p-4 bg-blue-50 rounded-lg">
+                                <div class="text-2xl font-bold text-blue-600" id="modified-count">0</div>
+                                <div class="text-sm text-blue-700">Modified Lines</div>
+                            </div>
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <div class="text-2xl font-bold text-gray-600" id="unchanged-count">0</div>
+                                <div class="text-sm text-gray-700">Unchanged Lines</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Diff Display -->
+                    <div class="tool-card rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Difference View</h3>
+                            <div class="flex space-x-2">
+                                <button id="unified-view" class="px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors">
+                                    Unified
+                                </button>
+                                <button id="side-by-side-view" class="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+                                    Side by Side
+                                </button>
+                                <button id="copy-diff" class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors">
+                                    <i class="fas fa-copy mr-1"></i>Copy
+                                </button>
+                            </div>
+                        </div>
+                        <div id="diff-display" class="diff-container border border-gray-300 rounded-lg bg-white max-h-96 overflow-auto">
+                            <!-- Diff will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tips Section -->
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="tool-card rounded-xl p-6 shadow-lg">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Pro Tips
+                        </h4>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5"></i>
+                                Use "Ignore Case" when comparing text that might have different capitalization
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5"></i>
+                                "Word-level Diff" highlights individual word changes within lines
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5"></i>
+                                Use the swap button to quickly reverse the comparison order
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tool-card rounded-xl p-6 shadow-lg">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-info-circle text-blue-500 mr-2"></i>Use Cases
+                        </h4>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li class="flex items-start">
+                                <i class="fas fa-code text-purple-500 mr-2 mt-0.5"></i>
+                                Compare code changes before committing
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-file-alt text-blue-500 mr-2 mt-0.5"></i>
+                                Review document revisions and edits
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-bug text-red-500 mr-2 mt-0.5"></i>
+                                Debug configuration file differences
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        // Sample texts for demonstration
+        const sampleText1 = `function calculateTotal(items) {
+    let total = 0;
+    for (let i = 0; i < items.length; i++) {
+        total += items[i].price;
+    }
+    return total;
+}
+
+const cart = [
+    { name: "Apple", price: 1.50 },
+    { name: "Banana", price: 0.80 }
+];
+
+console.log("Total:", calculateTotal(cart));`;
+
+        const sampleText2 = `function calculateTotal(items, taxRate = 0.1) {
+    let total = 0;
+    for (const item of items) {
+        total += item.price;
+    }
+    return total * (1 + taxRate);
+}
+
+const cart = [
+    { name: "Apple", price: 1.50 },
+    { name: "Banana", price: 0.80 },
+    { name: "Orange", price: 1.20 }
+];
+
+const result = calculateTotal(cart);
+console.log("Total with tax:", result.toFixed(2));`;
+        
+        // Mobile menu functionality
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        });
+        
+        overlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        });
+        
+        // Text areas and controls
+        const text1 = document.getElementById('text1');
+        const text2 = document.getElementById('text2');
+        const compareBtn = document.getElementById('compare-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const swapBtn = document.getElementById('swap-btn');
+        const resultsSection = document.getElementById('results-section');
+        const diffDisplay = document.getElementById('diff-display');
+        
+        // Options
+        const ignoreCase = document.getElementById('ignore-case');
+        const ignoreWhitespace = document.getElementById('ignore-whitespace');
+        const wordDiff = document.getElementById('word-diff');
+        
+        // View buttons
+        const unifiedView = document.getElementById('unified-view');
+        const sideBySideView = document.getElementById('side-by-side-view');
+        const copyDiff = document.getElementById('copy-diff');
+        
+        // Stats elements
+        const addedCount = document.getElementById('added-count');
+        const removedCount = document.getElementById('removed-count');
+        const modifiedCount = document.getElementById('modified-count');
+        const unchangedCount = document.getElementById('unchanged-count');
+        
+        // Line and character counters
+        const lines1 = document.getElementById('lines-1');
+        const chars1 = document.getElementById('chars-1');
+        const lines2 = document.getElementById('lines-2');
+        const chars2 = document.getElementById('chars-2');
+        
+        // Update counters
+        function updateCounters() {
+            const text1Value = text1.value;
+            const text2Value = text2.value;
+            
+            lines1.textContent = text1Value.split('\n').length;
+            chars1.textContent = text1Value.length;
+            lines2.textContent = text2Value.split('\n').length;
+            chars2.textContent = text2Value.length;
+        }
+        
+        text1.addEventListener('input', updateCounters);
+        text2.addEventListener('input', updateCounters);
+        
+        // Sample text loading
+        document.getElementById('load-sample-1').addEventListener('click', () => {
+            text1.value = sampleText1;
+            updateCounters();
+        });
+        
+        document.getElementById('load-sample-2').addEventListener('click', () => {
+            text2.value = sampleText2;
+            updateCounters();
+        });
+        
+        // Paste functionality
+        document.getElementById('paste-1').addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                text1.value = text;
+                updateCounters();
+            } catch (err) {
+                console.error('Failed to read clipboard:', err);
+            }
+        });
+        
+        document.getElementById('paste-2').addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                text2.value = text;
+                updateCounters();
+            } catch (err) {
+                console.error('Failed to read clipboard:', err);
+            }
+        });
+        
+        // Clear all functionality
+        clearBtn.addEventListener('click', () => {
+            text1.value = '';
+            text2.value = '';
+            updateCounters();
+            resultsSection.classList.add('hidden');
+        });
+        
+        // Swap texts functionality
+        swapBtn.addEventListener('click', () => {
+            const temp = text1.value;
+            text1.value = text2.value;
+            text2.value = temp;
+            updateCounters();
+            
+            // Add animation effect
+            swapBtn.style.transform = 'rotate(180deg)';
+            setTimeout(() => {
+                swapBtn.style.transform = '';
+            }, 300);
+        });
+        
+        // Diff algorithm implementation
+        function computeLCS(text1, text2) {
+            const lines1 = text1.split('\n');
+            const lines2 = text2.split('\n');
+            const m = lines1.length;
+            const n = lines2.length;
+            
+            // Create LCS table
+            const lcs = Array(m + 1).fill().map(() => Array(n + 1).fill(0));
+            
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    if (compareLines(lines1[i - 1], lines2[j - 1])) {
+                        lcs[i][j] = lcs[i - 1][j - 1] + 1;
+                    } else {
+                        lcs[i][j] = Math.max(lcs[i - 1][j], lcs[i][j - 1]);
+                    }
+                }
+            }
+            
+            return lcs;
+        }
+        
+        function compareLines(line1, line2) {
+            if (ignoreCase.checked) {
+                line1 = line1.toLowerCase();
+                line2 = line2.toLowerCase();
+            }
+            
+            if (ignoreWhitespace.checked) {
+                line1 = line1.replace(/\s+/g, ' ').trim();
+                line2 = line2.replace(/\s+/g, ' ').trim();
+            }
+            
+            return line1 === line2;
+        }
+        
+        function generateDiff(text1, text2) {
+            const lines1 = text1.split('\n');
+            const lines2 = text2.split('\n');
+            const lcs = computeLCS(text1, text2);
+            
+            const diff = [];
+            let i = lines1.length;
+            let j = lines2.length;
+            
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0 && compareLines(lines1[i - 1], lines2[j - 1])) {
+                    diff.unshift({
+                        type: 'unchanged',
+                        line1: lines1[i - 1],
+                        line2: lines2[j - 1],
+                        lineNum1: i,
+                        lineNum2: j
+                    });
+                    i--;
+                    j--;
+                } else if (j > 0 && (i === 0 || lcs[i][j - 1] >= lcs[i - 1][j])) {
+                    diff.unshift({
+                        type: 'added',
+                        line2: lines2[j - 1],
+                        lineNum2: j
+                    });
+                    j--;
+                } else if (i > 0 && (j === 0 || lcs[i][j - 1] < lcs[i - 1][j])) {
+                    diff.unshift({
+                        type: 'removed',
+                        line1: lines1[i - 1],
+                        lineNum1: i
+                    });
+                    i--;
+                }
+            }
+            
+            return diff;
+        }
+        
+        function highlightWordDifferences(line1, line2) {
+            if (!wordDiff.checked || !line1 || !line2) {
+                return { highlighted1: line1, highlighted2: line2 };
+            }
+            
+            const words1 = line1.split(/(\s+)/);
+            const words2 = line2.split(/(\s+)/);
+            
+            // Simple word-level comparison
+            let highlighted1 = '';
+            let highlighted2 = '';
+            
+            const maxLen = Math.max(words1.length, words2.length);
+            
+            for (let i = 0; i < maxLen; i++) {
+                const word1 = words1[i] || '';
+                const word2 = words2[i] || '';
+                
+                if (word1 !== word2) {
+                    if (word1) {
+                        highlighted1 += `<span class="diff-highlight">${escapeHtml(word1)}</span>`;
+                    }
+                    if (word2) {
+                        highlighted2 += `<span class="diff-highlight">${escapeHtml(word2)}</span>`;
+                    }
+                } else {
+                    highlighted1 += escapeHtml(word1);
+                    highlighted2 += escapeHtml(word2);
+                }
+            }
+            
+            return { highlighted1, highlighted2 };
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function renderUnifiedDiff(diff) {
+            let html = '<div class="font-mono text-sm">';
+            let stats = { added: 0, removed: 0, modified: 0, unchanged: 0 };
+            
+            diff.forEach(item => {
+                switch (item.type) {
+                    case 'added':
+                        stats.added++;
+                        html += `<div class="added-line flex">
+                            <div class="line-number px-3 py-1 text-xs w-12 text-center">+${item.lineNum2}</div>
+                            <div class="flex-1 px-3 py-1">+ ${escapeHtml(item.line2)}</div>
+                        </div>`;
+                        break;
+                    case 'removed':
+                        stats.removed++;
+                        html += `<div class="removed-line flex">
+                            <div class="line-number px-3 py-1 text-xs w-12 text-center">-${item.lineNum1}</div>
+                            <div class="flex-1 px-3 py-1">- ${escapeHtml(item.line1)}</div>
+                        </div>`;
+                        break;
+                    case 'unchanged':
+                        stats.unchanged++;
+                        html += `<div class="unchanged-line flex">
+                            <div class="line-number px-3 py-1 text-xs w-12 text-center">${item.lineNum1}</div>
+                            <div class="flex-1 px-3 py-1">${escapeHtml(item.line1)}</div>
+                        </div>`;
+                        break;
+                }
+            });
+            
+            html += '</div>';
+            
+            return { html, stats };
+        }
+        
+        function renderSideBySideDiff(diff) {
+            let html = '<div class="grid grid-cols-2 gap-4 font-mono text-sm">';
+            html += '<div class="border-r pr-4">';
+            html += '<h4 class="font-semibold mb-2 text-gray-700">Original</h4>';
+            
+            let stats = { added: 0, removed: 0, modified: 0, unchanged: 0 };
+            
+            // Left side (original)
+            diff.forEach(item => {
+                if (item.type === 'removed' || item.type === 'unchanged') {
+                    const lineClass = item.type === 'removed' ? 'removed-line' : 'unchanged-line';
+                    const lineContent = item.line1 || '';
+                    const lineNum = item.lineNum1 || '';
+                    
+                    html += `<div class="${lineClass} flex">
+                        <div class="line-number px-2 py-1 text-xs w-10 text-center">${lineNum}</div>
+                        <div class="flex-1 px-2 py-1">${escapeHtml(lineContent)}</div>
+                    </div>`;
+                } else if (item.type === 'added') {
+                    html += `<div class="unchanged-line flex opacity-30">
+                        <div class="line-number px-2 py-1 text-xs w-10 text-center"></div>
+                        <div class="flex-1 px-2 py-1"></div>
+                    </div>`;
+                }
+            });
+            
+            html += '</div><div class="pl-4">';
+            html += '<h4 class="font-semibold mb-2 text-gray-700">Modified</h4>';
+            
+            // Right side (modified)
+            diff.forEach(item => {
+                if (item.type === 'added' || item.type === 'unchanged') {
+                    const lineClass = item.type === 'added' ? 'added-line' : 'unchanged-line';
+                    const lineContent = item.line2 || '';
+                    const lineNum = item.lineNum2 || '';
+                    
+                    html += `<div class="${lineClass} flex">
+                        <div class="line-number px-2 py-1 text-xs w-10 text-center">${lineNum}</div>
+                        <div class="flex-1 px-2 py-1">${escapeHtml(lineContent)}</div>
+                    </div>`;
+                } else if (item.type === 'removed') {
+                    html += `<div class="unchanged-line flex opacity-30">
+                        <div class="line-number px-2 py-1 text-xs w-10 text-center"></div>
+                        <div class="flex-1 px-2 py-1"></div>
+                    </div>`;
+                }
+                
+                // Count stats
+                switch (item.type) {
+                    case 'added': stats.added++; break;
+                    case 'removed': stats.removed++; break;
+                    case 'unchanged': stats.unchanged++; break;
+                }
+            });
+            
+            html += '</div></div>';
+            
+            return { html, stats };
+        }
+        
+        function updateStats(stats) {
+            addedCount.textContent = stats.added;
+            removedCount.textContent = stats.removed;
+            modifiedCount.textContent = stats.modified;
+            unchangedCount.textContent = stats.unchanged;
+        }
+        
+        let currentDiff = null;
+        let currentView = 'unified';
+        
+        // Compare button functionality
+        compareBtn.addEventListener('click', () => {
+            const text1Value = text1.value;
+            const text2Value = text2.value;
+            
+            if (!text1Value.trim() && !text2Value.trim()) {
+                alert('Please enter text in at least one of the text areas.');
+                return;
+            }
+            
+            // Add loading animation
+            compareBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Comparing...';
+            compareBtn.disabled = true;
+            
+            setTimeout(() => {
+                currentDiff = generateDiff(text1Value, text2Value);
+                
+                const result = currentView === 'unified' ? 
+                    renderUnifiedDiff(currentDiff) : 
+                    renderSideBySideDiff(currentDiff);
+                
+                diffDisplay.innerHTML = result.html;
+                updateStats(result.stats);
+                
+                resultsSection.classList.remove('hidden');
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                // Reset button
+                compareBtn.innerHTML = '<i class="fas fa-search mr-2"></i>Compare Texts';
+                compareBtn.disabled = false;
+            }, 500);
+        });
+        
+        // View toggle functionality
+        unifiedView.addEventListener('click', () => {
+            if (currentDiff) {
+                currentView = 'unified';
+                unifiedView.className = 'px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors';
+                sideBySideView.className = 'px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors';
+                
+                const result = renderUnifiedDiff(currentDiff);
+                diffDisplay.innerHTML = result.html;
+            }
+        });
+        
+        sideBySideView.addEventListener('click', () => {
+            if (currentDiff) {
+                currentView = 'side-by-side';
+                sideBySideView.className = 'px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors';
+                unifiedView.className = 'px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors';
+                
+                const result = renderSideBySideDiff(currentDiff);
+                diffDisplay.innerHTML = result.html;
+            }
+        });
+        
+        // Copy diff functionality
+        copyDiff.addEventListener('click', async () => {
+            if (!currentDiff) return;
+            
+            let textToCopy = '';
+            currentDiff.forEach(item => {
+                switch (item.type) {
+                    case 'added':
+                        textToCopy += `+ ${item.line2}\n`;
+                        break;
+                    case 'removed':
+                        textToCopy += `- ${item.line1}\n`;
+                        break;
+                    case 'unchanged':
+                        textToCopy += `  ${item.line1}\n`;
+                        break;
+                }
+            });
+            
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                
+                // Show feedback
+                const originalText = copyDiff.innerHTML;
+                copyDiff.innerHTML = '<i class="fas fa-check mr-1"></i>Copied!';
+                copyDiff.className = 'px-3 py-1 text-xs bg-green-600 text-white rounded';
+                
+                setTimeout(() => {
+                    copyDiff.innerHTML = originalText;
+                    copyDiff.className = 'px-3 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy to clipboard:', err);
+            }
+        });
+        
+        // Option change handlers
+        [ignoreCase, ignoreWhitespace, wordDiff].forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                if (currentDiff && (text1.value || text2.value)) {
+                    // Re-run comparison with new options
+                    compareBtn.click();
+                }
+            });
+        });
+        
+        // Initialize counters
+        updateCounters();
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 'Enter':
+                        e.preventDefault();
+                        compareBtn.click();
+                        break;
+                    case 'k':
+                        e.preventDefault();
+                        clearBtn.click();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        swapBtn.click();
+                        break;
+                }
+            }
+        });
+        
+        // Add focus management
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                document.body.classList.add('user-is-tabbing');
+            }
+        });
+        
+        document.addEventListener('mousedown', function() {
+            document.body.classList.remove('user-is-tabbing');
+        });
+        
+        // Add responsive text area resize
+        function adjustTextAreaHeight() {
+            const textAreas = [text1, text2];
+            textAreas.forEach(textarea => {
+                textarea.style.height = 'auto';
+                textarea.style.height = Math.min(textarea.scrollHeight, 400) + 'px';
+            });
+        }
+        
+        text1.addEventListener('input', adjustTextAreaHeight);
+        text2.addEventListener('input', adjustTextAreaHeight);
+        
+        // Add smooth animations for results
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        // Observe results section for animation
+        if (resultsSection) {
+            resultsSection.style.opacity = '0';
+            resultsSection.style.transform = 'translateY(20px)';
+            resultsSection.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(resultsSection);
+        }
+    </script>
+</body>
+</html>

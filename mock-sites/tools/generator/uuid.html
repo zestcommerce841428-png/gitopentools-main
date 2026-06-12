@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UUID Generator Tool - Dev Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu-item {
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-menu-item:hover {
+            transform: translateX(4px);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .sidebar-menu-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .sidebar-menu-item.active i {
+            color: white;
+        }
+
+        .code-output {
+            font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.1;
+            }
+
+            90% {
+                opacity: 0.1;
+            }
+
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 100;
+        }
+
+        .copy-success {
+            animation: copySuccess 2s ease-in-out;
+        }
+
+        @keyframes copySuccess {
+            0% {
+                background-color: #10b981;
+            }
+
+            100% {
+                background-color: #6366f1;
+            }
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-mobile {
+                transform: translateX(-100%);
+            }
+
+            .sidebar-mobile.open {
+                transform: translateX(0);
+            }
+        }
+
+        /* UUID specific styles */
+        .uuid-preview {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .uuid-version-tag {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.25rem;
+            background-color: #6366f1;
+            color: white;
+            margin-left: 0.5rem;
+        }
+
+        .history-item {
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .history-item:hover {
+            border-left-color: #6366f1;
+            background-color: #f8fafc;
+        }
+
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #6366f1;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #6366f1;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Floating Background Elements -->
+    <div class="floating-elements">
+        <div class="floating-element gradient-bg w-20 h-20 rounded-full" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-element gradient-bg w-12 h-12 rounded-full" style="left: 20%; animation-delay: 5s;"></div>
+        <div class="floating-element gradient-bg w-16 h-16 rounded-full" style="left: 30%; animation-delay: 10s;"></div>
+        <div class="floating-element gradient-bg w-8 h-8 rounded-full" style="left: 40%; animation-delay: 15s;"></div>
+        <div class="floating-element gradient-bg w-24 h-24 rounded-full" style="left: 60%; animation-delay: 3s;"></div>
+        <div class="floating-element gradient-bg w-14 h-14 rounded-full" style="left: 70%; animation-delay: 8s;"></div>
+        <div class="floating-element gradient-bg w-10 h-10 rounded-full" style="left: 80%; animation-delay: 12s;"></div>
+        <div class="floating-element gradient-bg w-18 h-18 rounded-full" style="left: 90%; animation-delay: 7s;"></div>
+    </div>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg sidebar-transition fixed md:relative z-20 h-full sidebar-mobile"
+            id="sidebar">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                        <i class="fas fa-code text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">Dev Tools</h1>
+                        <p class="text-xs text-gray-500">45+ Developer Utilities</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="p-4">
+                <div class="relative">
+                    <input type="text" placeholder="Search tools..."
+                        class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        id="toolSearch">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- Menu Categories -->
+            <nav class="flex-1 overflow-y-auto custom-scrollbar">
+                <!-- Text Tools -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Text Tools</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-quote-right w-5 text-purple-500 mr-3"></i>
+                                Text Escape
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-text-width w-5 text-purple-500 mr-3"></i>
+                                Case Converter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-paragraph w-5 text-purple-500 mr-3"></i>
+                                Lorem Ipsum
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-align-left w-5 text-purple-500 mr-3"></i>
+                                Text Formatter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Formatters -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Formatters</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-code w-5 text-purple-500 mr-3"></i>
+                                JSON Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-file-code w-5 text-purple-500 mr-3"></i>
+                                XML Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-database w-5 text-purple-500 mr-3"></i>
+                                SQL Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fab fa-css3-alt w-5 text-purple-500 mr-3"></i>
+                                CSS Formatter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Generators -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Generators</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-lock w-5 text-purple-500 mr-3"></i>
+                                Password Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item active flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-fingerprint w-5 text-purple-500 mr-3"></i>
+                                UUID Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-palette w-5 text-purple-500 mr-3"></i>
+                                Color Generator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Converters -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Converters</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-exchange-alt w-5 text-purple-500 mr-3"></i>
+                                Base64 Encoder
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-clock w-5 text-purple-500 mr-3"></i>
+                                UNIX Timestamp
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-hashtag w-5 text-purple-500 mr-3"></i>
+                                Hash Generator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Testers -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Testers</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-search w-5 text-purple-500 mr-3"></i>
+                                Regex Tester
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-link w-5 text-purple-500 mr-3"></i>
+                                URL Validator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden hidden" id="sidebarOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button class="md:hidden text-gray-600 hover:text-purple-600" id="sidebarToggle">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">UUID Generator</h2>
+                            <p class="text-sm text-gray-500">Generate universally unique identifiers (UUIDs) for your applications
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button class="text-gray-600 hover:text-purple-600 transition-colors"
+                            onclick="window.location.href='#'">
+                            <i class="fas fa-home text-lg"></i>
+                        </button>
+                        <button class="text-gray-600 hover:text-purple-600 transition-colors" onclick="shareURL()">
+                            <i class="fas fa-share-alt text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tool Content -->
+            <div class="flex-1 overflow-auto p-6 space-y-6">
+                <!-- Tool Description -->
+                <div class="tool-card rounded-xl p-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-fingerprint text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">UUID Generator</h3>
+                            <p class="text-gray-600 leading-relaxed">
+                                A UUID (Universally Unique Identifier) is a 128-bit number used to uniquely identify information in computer systems. Generate UUIDs in various versions (v1, v4) with options to customize formatting and quantity. All generation happens locally in your browser for maximum privacy and security.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tool Interface -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Configuration Panel -->
+                    <div class="tool-card rounded-xl p-6 lg:col-span-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Configuration</h3>
+                        
+                        <!-- UUID Version -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">UUID Version</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button id="v4Btn" class="bg-indigo-600 text-white py-2 px-4 rounded-md text-sm font-medium transition-colors">
+                                    Version 4 (Random)
+                                </button>
+                                <button id="v1Btn" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-md text-sm font-medium transition-colors">
+                                    Version 1 (Time-based)
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">
+                                <span id="versionDescription">Version 4 uses random numbers and is most common.</span>
+                                <a href="#" class="text-indigo-600 hover:underline" id="versionInfoToggle">Learn more</a>
+                            </p>
+                            <div id="versionInfo" class="mt-2 p-3 bg-gray-100 rounded-md text-xs text-gray-600 hidden">
+                                <p><strong>Version 4 (Random)</strong>: Uses random numbers to generate UUIDs. Most commonly used when no specific requirements exist.</p>
+                                <p class="mt-2"><strong>Version 1 (Time-based)</strong>: Uses current time and MAC address to generate UUIDs. Useful when time ordering is important.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Quantity -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Number of UUIDs</label>
+                            <input type="range" min="1" max="50" value="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" id="uuidCount">
+                            <div class="flex justify-between items-center mt-1">
+                                <span class="text-xs text-gray-500">1</span>
+                                <span class="text-sm font-medium text-indigo-600" id="countValue">5</span>
+                                <span class="text-xs text-gray-500">50</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Formatting Options -->
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Formatting</label>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <input type="radio" id="formatHyphen" name="format" value="hyphen" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" checked>
+                                    <label for="formatHyphen" class="ml-2 block text-sm text-gray-700">With hyphens (standard)</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="formatNoHyphen" name="format" value="nohyphen" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                                    <label for="formatNoHyphen" class="ml-2 block text-sm text-gray-700">Without hyphens</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="formatUpper" name="format" value="upper" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                                    <label for="formatUpper" class="ml-2 block text-sm text-gray-700">Uppercase</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="formatBraces" name="format" value="braces" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300">
+                                    <label for="formatBraces" class="ml-2 block text-sm text-gray-700">With braces</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Generate Button -->
+                        <button id="generateBtn" class="w-full gradient-bg text-white py-3 px-4 rounded-md font-medium hover:opacity-90 transition-opacity flex items-center justify-center">
+                            <i class="fas fa-bolt mr-2"></i>
+                            Generate UUIDs
+                        </button>
+                    </div>
+                    
+                    <!-- Results Panel -->
+                    <div class="tool-card rounded-xl p-6 lg:col-span-2">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Generated UUIDs</h3>
+                            <button id="copyAllBtn" class="bg-indigo-100 text-indigo-700 py-1.5 px-3 rounded-md text-sm font-medium hover:bg-indigo-200 transition-colors flex items-center">
+                                <i class="fas fa-copy mr-1.5"></i>
+                                Copy All
+                            </button>
+                        </div>
+                        
+                        <div class="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto custom-scrollbar" id="resultsContainer">
+                            <div class="text-center py-12 text-gray-500" id="emptyState">
+                                <i class="fas fa-fingerprint text-4xl mb-3 opacity-50"></i>
+                                <p>Your UUIDs will appear here</p>
+                                <p class="text-sm mt-1">Configure options and click "Generate UUIDs"</p>
+                            </div>
+                        </div>
+                        
+                        <!-- History Section -->
+                        <div class="mt-6">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="text-md font-medium text-gray-900">Recent Generations</h4>
+                                <button id="clearHistoryBtn" class="text-xs text-gray-500 hover:text-indigo-600 transition-colors">
+                                    Clear History
+                                </button>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-3 max-h-40 overflow-y-auto custom-scrollbar" id="historyContainer">
+                                <p class="text-center text-gray-500 py-4 text-sm">No generation history yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // DOM Elements
+        const uuidCount = document.getElementById('uuidCount');
+        const countValue = document.getElementById('countValue');
+        const generateBtn = document.getElementById('generateBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const emptyState = document.getElementById('emptyState');
+        const copyAllBtn = document.getElementById('copyAllBtn');
+        const v4Btn = document.getElementById('v4Btn');
+        const v1Btn = document.getElementById('v1Btn');
+        const versionDescription = document.getElementById('versionDescription');
+        const versionInfoToggle = document.getElementById('versionInfoToggle');
+        const versionInfo = document.getElementById('versionInfo');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const historyContainer = document.getElementById('historyContainer');
+        
+        // State
+        let uuidVersion = 'v4';
+        let generationHistory = JSON.parse(localStorage.getItem('uuidHistory')) || [];
+        
+        // Update count value display
+        uuidCount.addEventListener('input', () => {
+            countValue.textContent = uuidCount.value;
+        });
+        
+        // Toggle UUID version
+        v4Btn.addEventListener('click', () => {
+            setUuidVersion('v4');
+        });
+        
+        v1Btn.addEventListener('click', () => {
+            setUuidVersion('v1');
+        });
+        
+        function setUuidVersion(version) {
+            uuidVersion = version;
+            if (version === 'v4') {
+                v4Btn.classList.add('bg-indigo-600', 'text-white');
+                v4Btn.classList.remove('bg-gray-200', 'text-gray-700');
+                v1Btn.classList.add('bg-gray-200', 'text-gray-700');
+                v1Btn.classList.remove('bg-indigo-600', 'text-white');
+                versionDescription.textContent = 'Version 4 uses random numbers and is most common.';
+            } else {
+                v1Btn.classList.add('bg-indigo-600', 'text-white');
+                v1Btn.classList.remove('bg-gray-200', 'text-gray-700');
+                v4Btn.classList.add('bg-gray-200', 'text-gray-700');
+                v4Btn.classList.remove('bg-indigo-600', 'text-white');
+                versionDescription.textContent = 'Version 1 uses current time and is time-ordered.';
+            }
+        }
+        
+        // Toggle version info
+        versionInfoToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            versionInfo.classList.toggle('hidden');
+        });
+        
+        // Generate UUIDs
+        generateBtn.addEventListener('click', generateUUIDs);
+        
+        function generateUUIDs() {
+            const count = parseInt(uuidCount.value);
+            const format = document.querySelector('input[name="format"]:checked').value;
+            
+            // Clear previous results but keep empty state hidden
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+            
+            // Clear results container
+            resultsContainer.innerHTML = '';
+            
+            // Generate UUIDs
+            const uuids = [];
+            for (let i = 0; i < count; i++) {
+                let uuid;
+                if (uuidVersion === 'v4') {
+                    uuid = generateV4UUID();
+                } else {
+                    uuid = generateV1UUID();
+                }
+                
+                // Apply formatting
+                uuid = formatUUID(uuid, format);
+                
+                uuids.push(uuid);
+                
+                // Create UUID element
+                const uuidEl = document.createElement('div');
+                uuidEl.className = 'flex justify-between items-center p-3 border-b border-gray-200 last:border-b-0';
+                uuidEl.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="uuid-preview text-sm">${uuid}</span>
+                        <span class="uuid-version-tag">${uuidVersion}</span>
+                    </div>
+                    <button class="text-indigo-600 hover:text-indigo-800 transition-colors copy-btn" data-uuid="${uuid}">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                `;
+                
+                resultsContainer.appendChild(uuidEl);
+            }
+            
+            // Add copy event listeners
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const uuid = btn.getAttribute('data-uuid');
+                    copyToClipboard(uuid);
+                    
+                    // Visual feedback
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-check"></i>';
+                    btn.classList.add('copy-success');
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                        btn.classList.remove('copy-success');
+                    }, 2000);
+                });
+            });
+            
+            // Save to history
+            addToHistory(uuids, format, uuidVersion);
+        }
+        
+        // Copy all UUIDs
+        copyAllBtn.addEventListener('click', () => {
+            const uuidElements = document.querySelectorAll('.uuid-preview');
+            if (uuidElements.length === 0) return;
+            
+            const allUUIDs = Array.from(uuidElements).map(el => el.textContent).join('\n');
+            copyToClipboard(allUUIDs);
+            
+            // Visual feedback
+            const originalText = copyAllBtn.innerHTML;
+            copyAllBtn.innerHTML = '<i class="fas fa-check mr-1.5"></i> Copied!';
+            copyAllBtn.classList.add('copy-success');
+            
+            setTimeout(() => {
+                copyAllBtn.innerHTML = originalText;
+                copyAllBtn.classList.remove('copy-success');
+            }, 2000);
+        });
+        
+        // Generate v4 UUID (random)
+        function generateV4UUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+        
+        // Generate v1 UUID (time-based)
+        function generateV1UUID() {
+            // For a real v1 UUID we'd need MAC address and precise timekeeping
+            // This is a simplified version for demonstration
+            const now = new Date().getTime();
+            const timeLow = ((now & 0xFFFFFFFF) >>> 0).toString(16).padStart(8, '0');
+            const timeMid = ((now / 0xFFFFFFFF & 0xFFFF) >>> 0).toString(16).padStart(4, '0');
+            const timeHigh = ((now / 0x1000000000000 & 0xFFFF) | 0x1000).toString(16).padStart(4, '0').substring(1);
+            
+            // Random node (would be MAC address in a real v1 UUID)
+            const node = 'xxxxxx'.replace(/x/g, () => Math.random() * 16 | 0).toString(16);
+            
+            return `${timeLow}-${timeMid}-1${timeHigh}-89ab-${node}`;
+        }
+        
+        // Format UUID based on selection
+        function formatUUID(uuid, format) {
+            switch(format) {
+                case 'nohyphen':
+                    return uuid.replace(/-/g, '');
+                case 'upper':
+                    return uuid.toUpperCase();
+                case 'braces':
+                    return `{${uuid}}`;
+                default:
+                    return uuid;
+            }
+        }
+        
+        // Copy to clipboard
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+        
+        // History functionality
+        function addToHistory(uuids, format, version) {
+            const timestamp = new Date().toISOString();
+            const historyItem = {
+                uuids,
+                format,
+                version,
+                timestamp
+            };
+            
+            generationHistory.unshift(historyItem);
+            
+            // Keep only last 10 items
+            if (generationHistory.length > 10) {
+                generationHistory = generationHistory.slice(0, 10);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('uuidHistory', JSON.stringify(generationHistory));
+            
+            // Update history display
+            renderHistory();
+        }
+        
+        function renderHistory() {
+            if (generationHistory.length === 0) {
+                historyContainer.innerHTML = '<p class="text-center text-gray-500 py-4 text-sm">No generation history yet</p>';
+                return;
+            }
+            
+            historyContainer.innerHTML = '';
+            
+            generationHistory.forEach(item => {
+                const date = new Date(item.timestamp);
+                const timeString = date.toLocaleTimeString();
+                
+                const historyEl = document.createElement('div');
+                historyEl.className = 'history-item p-2 mb-2 bg-white rounded border border-gray-200';
+                historyEl.innerHTML = `
+                    <div class="flex justify-between items-center text-xs text-gray-500 mb-1">
+                        <span>${item.uuids.length} UUID${item.uuids.length !== 1 ? 's' : ''} (v${item.version.slice(1)})</span>
+                        <span>${timeString}</span>
+                    </div>
+                    <div class="text-sm font-mono truncate">${item.uuids[0]}</div>
+                `;
+                
+                historyEl.addEventListener('click', () => {
+                    // Fill the results with this history item
+                    resultsContainer.innerHTML = '';
+                    emptyState.style.display = 'none';
+                    
+                    item.uuids.forEach(uuid => {
+                        const uuidEl = document.createElement('div');
+                        uuidEl.className = 'flex justify-between items-center p-3 border-b border-gray-200 last:border-b-0';
+                        uuidEl.innerHTML = `
+                            <div class="flex items-center">
+                                <span class="uuid-preview text-sm">${uuid}</span>
+                                <span class="uuid-version-tag">v${item.version.slice(1)}</span>
+                            </div>
+                            <button class="text-indigo-600 hover:text-indigo-800 transition-colors copy-btn" data-uuid="${uuid}">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        `;
+                        
+                        resultsContainer.appendChild(uuidEl);
+                    });
+                    
+                    // Add copy event listeners
+                    document.querySelectorAll('.copy-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const uuid = btn.getAttribute('data-uuid');
+                            copyToClipboard(uuid);
+                            
+                            // Visual feedback
+                            const originalHtml = btn.innerHTML;
+                            btn.innerHTML = '<i class="fas fa-check"></i>';
+                            btn.classList.add('copy-success');
+                            
+                            setTimeout(() => {
+                                btn.innerHTML = originalHtml;
+                                btn.classList.remove('copy-success');
+                            }, 2000);
+                        });
+                    });
+                });
+                
+                historyContainer.appendChild(historyEl);
+            });
+        }
+        
+        // Clear history
+        clearHistoryBtn.addEventListener('click', () => {
+            generationHistory = [];
+            localStorage.removeItem('uuidHistory');
+            renderHistory();
+        });
+        
+        // Initialize
+        setUuidVersion('v4');
+        renderHistory();
+        
+        // Mobile sidebar toggle (from existing code)
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('hidden');
+        });
+        
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.add('hidden');
+        });
+        
+        // Tool search functionality (from existing code)
+        const toolSearch = document.getElementById('toolSearch');
+        toolSearch.addEventListener('input', () => {
+            const searchTerm = toolSearch.value.toLowerCase();
+            const menuItems = document.querySelectorAll('.sidebar-menu-item');
+            
+            menuItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.parentElement.style.display = 'block';
+                } else {
+                    item.parentElement.style.display = 'none';
+                }
+            });
+        });
+        
+        // Share URL function (from existing code)
+        function shareURL() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'UUID Generator - Dev Tools',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Link copied to clipboard!');
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>

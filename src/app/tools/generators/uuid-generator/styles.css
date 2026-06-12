@@ -1,0 +1,115 @@
+.uuid-container {
+    min-height: 200px;
+}
+
+.uuid-textarea {
+    font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+    resize: none;
+    min-height: 200px;
+}
+
+.uuid-preview {
+    font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+    white-space: pre;
+    overflow: auto;
+    min-height: 200px;
+    max-height: 400px;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    line-height: 1.5;
+}
+
+.uuid-item {
+    padding: 2px 0;
+    font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+}
+
+.options-panel {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+}
+
+.advanced-options {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* Custom radio and checkbox styles */
+.custom-radio {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.custom-radio input {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.custom-checkbox input {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+/* Quantity input */
+.quantity-input {
+    width: 80px;
+    padding: 0.375rem 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+}
+
+/* Version info tooltip */
+.version-info {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.version-info .tooltip {
+    visibility: hidden;
+    width: 250px;
+    background-color: #374151;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 8px 12px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -125px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.875rem;
+}
+
+.version-info:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Copy button animation */
+@keyframes copyPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.copied {
+    animation: copyPulse 0.3s ease-in-out;
+}

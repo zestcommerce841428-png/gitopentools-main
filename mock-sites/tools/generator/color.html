@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Generator Tool - Dev Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu-item {
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-menu-item:hover {
+            transform: translateX(4px);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .sidebar-menu-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .sidebar-menu-item.active i {
+            color: white;
+        }
+
+        .code-output {
+            font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.1;
+            }
+
+            90% {
+                opacity: 0.1;
+            }
+
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 100;
+        }
+
+        .copy-success {
+            animation: copySuccess 2s ease-in-out;
+        }
+
+        @keyframes copySuccess {
+            0% {
+                background-color: #10b981;
+            }
+
+            100% {
+                background-color: #6366f1;
+            }
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-mobile {
+                transform: translateX(-100%);
+            }
+
+            .sidebar-mobile.open {
+                transform: translateX(0);
+            }
+        }
+
+        /* Color Generator Specific Styles */
+        .color-box {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .color-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .color-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .color-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .color-preview {
+            transition: all 0.3s ease;
+        }
+
+        .color-preview:hover {
+            transform: translateY(-5px);
+        }
+
+        .hue-slider {
+            background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+        }
+
+        .export-option {
+            transition: all 0.2s ease;
+        }
+
+        .export-option:hover {
+            transform: translateY(-3px);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .color-history-item {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .color-history-item:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Floating Background Elements -->
+    <div class="floating-elements">
+        <div class="floating-element gradient-bg w-20 h-20 rounded-full" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-element gradient-bg w-12 h-12 rounded-full" style="left: 20%; animation-delay: 5s;"></div>
+        <div class="floating-element gradient-bg w-16 h-16 rounded-full" style="left: 30%; animation-delay: 10s;"></div>
+        <div class="floating-element gradient-bg w-8 h-8 rounded-full" style="left: 40%; animation-delay: 15s;"></div>
+        <div class="floating-element gradient-bg w-24 h-24 rounded-full" style="left: 60%; animation-delay: 3s;"></div>
+        <div class="floating-element gradient-bg w-14 h-14 rounded-full" style="left: 70%; animation-delay: 8s;"></div>
+        <div class="floating-element gradient-bg w-10 h-10 rounded-full" style="left: 80%; animation-delay: 12s;"></div>
+        <div class="floating-element gradient-bg w-18 h-18 rounded-full" style="left: 90%; animation-delay: 7s;"></div>
+    </div>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg sidebar-transition fixed md:relative z-20 h-full sidebar-mobile"
+            id="sidebar">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                        <i class="fas fa-code text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">Dev Tools</h1>
+                        <p class="text-xs text-gray-500">45+ Developer Utilities</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="p-4">
+                <div class="relative">
+                    <input type="text" placeholder="Search tools..."
+                        class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        id="toolSearch">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- Menu Categories -->
+            <nav class="flex-1 overflow-y-auto custom-scrollbar">
+                <!-- Text Tools -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Text Tools</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-quote-right w-5 text-purple-500 mr-3"></i>
+                                Text Escape
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-text-width w-5 text-purple-500 mr-3"></i>
+                                Case Converter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-paragraph w-5 text-purple-500 mr-3"></i>
+                                Lorem Ipsum
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-align-left w-5 text-purple-500 mr-3"></i>
+                                Text Formatter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Formatters -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Formatters</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-code w-5 text-purple-500 mr-3"></i>
+                                JSON Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-file-code w-5 text-purple-500 mr-3"></i>
+                                XML Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-database w-5 text-purple-500 mr-3"></i>
+                                SQL Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fab fa-css3-alt w-5 text-purple-500 mr-3"></i>
+                                CSS Formatter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Generators -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Generators</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-lock w-5 text-purple-500 mr-3"></i>
+                                Password Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-fingerprint w-5 text-purple-500 mr-3"></i>
+                                UUID Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="color-generator.html"
+                                class="sidebar-menu-item active flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-palette w-5 text-purple-500 mr-3"></i>
+                                Color Generator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Converters -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Converters</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-exchange-alt w-5 text-purple-500 mr-3"></i>
+                                Base64 Encoder
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-clock w-5 text-purple-500 mr-3"></i>
+                                UNIX Timestamp
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-hashtag w-5 text-purple-500 mr-3"></i>
+                                Hash Generator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Testers -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Testers</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-search w-5 text-purple-500 mr-3"></i>
+                                Regex Tester
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-link w-5 text-purple-500 mr-3"></i>
+                                URL Validator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden hidden" id="sidebarOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button class="md:hidden text-gray-600 hover:text-purple-600" id="sidebarToggle">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">Color Generator</h2>
+                            <p class="text-sm text-gray-500">Create beautiful color palettes for your projects
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button class="text-gray-600 hover:text-purple-600 transition-colors"
+                            onclick="window.location.href='#'">
+                            <i class="fas fa-home text-lg"></i>
+                        </button>
+                        <button class="text-gray-600 hover:text-purple-600 transition-colors" onclick="shareURL()">
+                            <i class="fas fa-share-alt text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tool Content -->
+            <div class="flex-1 overflow-auto p-6 space-y-6">
+                <!-- Tool Description -->
+                <div class="tool-card rounded-xl p-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-palette text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Color Generator</h3>
+                            <p class="text-gray-600 leading-relaxed">
+                                Generate beautiful color palettes for your projects. Create harmonious color schemes,
+                                adjust saturation and brightness, and export colors in various formats including HEX,
+                                RGB, HSL, and CSS variables.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Color Generator Interface -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Color Controls -->
+                    <div class="tool-card rounded-xl p-6 lg:col-span-1">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Color Controls</h3>
+                        
+                        <div class="space-y-4">
+                            <!-- Base Color Picker -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Base Color</label>
+                                <div class="flex items-center space-x-3">
+                                    <input type="color" id="baseColor" value="#667eea" class="w-12 h-12 rounded-lg border-0 cursor-pointer">
+                                    <input type="text" id="baseColorValue" value="#667eea" class="flex-1 px-3 py-2 border border-gray-200 rounded-lg font-mono text-sm">
+                                    <button id="randomColor" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors" title="Random Color">
+                                        <i class="fas fa-dice text-gray-700"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Color Harmony -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Color Harmony</label>
+                                <select id="harmonyType" class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    <option value="analogous">Analogous</option>
+                                    <option value="monochromatic">Monochromatic</option>
+                                    <option value="triadic">Triadic</option>
+                                    <option value="complementary">Complementary</option>
+                                    <option value="splitComplementary">Split Complementary</option>
+                                    <option value="tetradic">Tetradic</option>
+                                    <option value="square">Square</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Number of Colors -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Number of Colors</label>
+                                <input type="range" min="3" max="12" value="5" id="colorCount" class="w-full color-slider hue-slider">
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>3</span>
+                                    <span id="colorCountValue">5</span>
+                                    <span>12</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Saturation -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Saturation</label>
+                                <input type="range" min="0" max="100" value="80" id="saturation" class="w-full color-slider bg-gray-200">
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>0%</span>
+                                    <span id="saturationValue">80%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Brightness -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Brightness</label>
+                                <input type="range" min="0" max="100" value="70" id="brightness" class="w-full color-slider bg-gray-200">
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>0%</span>
+                                    <span id="brightnessValue">70%</span>
+                                    <span>100%</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Generate Button -->
+                            <button id="generateColors" class="w-full gradient-bg text-white py-3 rounded-lg font-medium hover:opacity-90 transition-opacity">
+                                Generate Palette
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Color Palette Display -->
+                    <div class="tool-card rounded-xl p-6 lg:col-span-2">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Color Palette</h3>
+                            <div class="flex space-x-2">
+                                <button id="exportCss" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm transition-colors">
+                                    CSS
+                                </button>
+                                <button id="exportScss" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm transition-colors">
+                                    SCSS
+                                </button>
+                                <button id="exportJson" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm transition-colors">
+                                    JSON
+                                </button>
+                                <button id="copyAll" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm transition-colors">
+                                    Copy All
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="colorPalette" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                            <!-- Colors will be generated here -->
+                        </div>
+                        
+                        <!-- Export Output -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Export Output</label>
+                            <div class="relative">
+                                <pre id="exportOutput" class="code-output p-4 rounded-lg h-40 overflow-auto text-sm">/* Generated palette will appear here */</pre>
+                                <button id="copyOutput" class="absolute top-2 right-2 p-2 bg-gray-100 hover:bg-gray-200 rounded transition-colors" title="Copy to Clipboard">
+                                    <i class="fas fa-copy text-gray-700"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Color History -->
+                <div class="tool-card rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Colors</h3>
+                    <div id="colorHistory" class="flex flex-wrap gap-2">
+                        <!-- Recent colors will appear here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // DOM Elements
+        const baseColorInput = document.getElementById('baseColor');
+        const baseColorValue = document.getElementById('baseColorValue');
+        const randomColorBtn = document.getElementById('randomColor');
+        const harmonyType = document.getElementById('harmonyType');
+        const colorCount = document.getElementById('colorCount');
+        const colorCountValue = document.getElementById('colorCountValue');
+        const saturation = document.getElementById('saturation');
+        const saturationValue = document.getElementById('saturationValue');
+        const brightness = document.getElementById('brightness');
+        const brightnessValue = document.getElementById('brightnessValue');
+        const generateColorsBtn = document.getElementById('generateColors');
+        const colorPalette = document.getElementById('colorPalette');
+        const exportOutput = document.getElementById('exportOutput');
+        const copyOutputBtn = document.getElementById('copyOutput');
+        const copyAllBtn = document.getElementById('copyAll');
+        const exportCssBtn = document.getElementById('exportCss');
+        const exportScssBtn = document.getElementById('exportScss');
+        const exportJsonBtn = document.getElementById('exportJson');
+        const colorHistory = document.getElementById('colorHistory');
+        
+        // Color history array
+        let recentColors = [];
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up event listeners
+            baseColorInput.addEventListener('input', updateBaseColorValue);
+            baseColorValue.addEventListener('change', updateBaseColorInput);
+            randomColorBtn.addEventListener('click', generateRandomColor);
+            colorCount.addEventListener('input', updateColorCountValue);
+            saturation.addEventListener('input', updateSaturationValue);
+            brightness.addEventListener('input', updateBrightnessValue);
+            generateColorsBtn.addEventListener('click', generateColorPalette);
+            copyOutputBtn.addEventListener('click', copyExportOutput);
+            copyAllBtn.addEventListener('click', copyAllColors);
+            exportCssBtn.addEventListener('click', () => exportColors('css'));
+            exportScssBtn.addEventListener('click', () => exportColors('scss'));
+            exportJsonBtn.addEventListener('click', () => exportColors('json'));
+            
+            // Load color history from localStorage if available
+            const savedColors = localStorage.getItem('colorHistory');
+            if (savedColors) {
+                recentColors = JSON.parse(savedColors);
+                renderColorHistory();
+            }
+            
+            // Generate initial palette
+            generateColorPalette();
+        });
+        
+        // Update base color value when color input changes
+        function updateBaseColorValue() {
+            baseColorValue.value = baseColorInput.value;
+        }
+        
+        // Update color input when value changes
+        function updateBaseColorInput() {
+            // Validate hex color
+            const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+            if (hexColorRegex.test(baseColorValue.value)) {
+                baseColorInput.value = baseColorValue.value;
+            } else {
+                alert('Please enter a valid hex color code (e.g. #667eea)');
+                baseColorValue.value = baseColorInput.value;
+            }
+        }
+        
+        // Generate a random color
+        function generateRandomColor() {
+            const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            baseColorInput.value = randomColor;
+            baseColorValue.value = randomColor;
+            generateColorPalette();
+        }
+        
+        // Update color count value display
+        function updateColorCountValue() {
+            colorCountValue.textContent = colorCount.value;
+        }
+        
+        // Update saturation value display
+        function updateSaturationValue() {
+            saturationValue.textContent = `${saturation.value}%`;
+        }
+        
+        // Update brightness value display
+        function updateBrightnessValue() {
+            brightnessValue.textContent = `${brightness.value}%`;
+        }
+        
+        // Convert hex to HSL
+        function hexToHsl(hex) {
+            // Convert hex to RGB first
+            let r = 0, g = 0, b = 0;
+            if (hex.length === 4) {
+                r = parseInt(hex[1] + hex[1], 16);
+                g = parseInt(hex[2] + hex[2], 16);
+                b = parseInt(hex[3] + hex[3], 16);
+            } else if (hex.length === 7) {
+                r = parseInt(hex[1] + hex[2], 16);
+                g = parseInt(hex[3] + hex[4], 16);
+                b = parseInt(hex[5] + hex[6], 16);
+            }
+            
+            // Then convert RGB to HSL
+            r /= 255;
+            g /= 255;
+            b /= 255;
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            
+            if (max === min) {
+                h = s = 0; // achromatic
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            
+            return [h * 360, s * 100, l * 100];
+        }
+        
+        // Convert HSL to Hex
+        function hslToHex(h, s, l) {
+            s /= 100;
+            l /= 100;
+            
+            let c = (1 - Math.abs(2 * l - 1)) * s;
+            let x = c * (1 - Math.abs((h / 60) % 2 - 1));
+            let m = l - c / 2;
+            let r = 0, g = 0, b = 0;
+            
+            if (0 <= h && h < 60) {
+                r = c; g = x; b = 0;
+            } else if (60 <= h && h < 120) {
+                r = x; g = c; b = 0;
+            } else if (120 <= h && h < 180) {
+                r = 0; g = c; b = x;
+            } else if (180 <= h && h < 240) {
+                r = 0; g = x; b = c;
+            } else if (240 <= h && h < 300) {
+                r = x; g = 0; b = c;
+            } else if (300 <= h && h < 360) {
+                r = c; g = 0; b = x;
+            }
+            
+            // Having obtained RGB, convert channels to hex
+            r = Math.round((r + m) * 255).toString(16).padStart(2, '0');
+            g = Math.round((g + m) * 255).toString(16).padStart(2, '0');
+            b = Math.round((b + m) * 255).toString(16).padStart(2, '0');
+            
+            return `#${r}${g}${b}`;
+        }
+        
+        // Generate color palette based on selected options
+        function generateColorPalette() {
+            const baseHex = baseColorInput.value;
+            const baseHsl = hexToHsl(baseHex);
+            const harmony = harmonyType.value;
+            const count = parseInt(colorCount.value);
+            const sat = parseInt(saturation.value);
+            const brt = parseInt(brightness.value);
+            
+            let colors = [];
+            
+            // Apply selected harmony
+            switch (harmony) {
+                case 'analogous':
+                    colors = generateAnalogousColors(baseHsl, count, sat, brt);
+                    break;
+                case 'monochromatic':
+                    colors = generateMonochromaticColors(baseHsl, count, sat, brt);
+                    break;
+                case 'triadic':
+                    colors = generateTriadicColors(baseHsl, count, sat, brt);
+                    break;
+                case 'complementary':
+                    colors = generateComplementaryColors(baseHsl, count, sat, brt);
+                    break;
+                case 'splitComplementary':
+                    colors = generateSplitComplementaryColors(baseHsl, count, sat, brt);
+                    break;
+                case 'tetradic':
+                    colors = generateTetradicColors(baseHsl, count, sat, brt);
+                    break;
+                case 'square':
+                    colors = generateSquareColors(baseHsl, count, sat, brt);
+                    break;
+                default:
+                    colors = generateAnalogousColors(baseHsl, count, sat, brt);
+            }
+            
+            // Render the palette
+            renderColorPalette(colors);
+            
+            // Export as CSS by default
+            exportColors('css');
+        }
+        
+        // Generate analogous colors
+        function generateAnalogousColors(baseHsl, count, sat, brt) {
+            const [h, s, l] = baseHsl;
+            const colors = [];
+            const step = 30; // degrees between analogous colors
+            
+            // Calculate starting point (center the base color)
+            const startHue = h - Math.floor(count / 2) * step;
+            
+            for (let i = 0; i < count; i++) {
+                const hue = (startHue + i * step) % 360;
+                const adjustedHue = hue < 0 ? hue + 360 : hue;
+                colors.push(hslToHex(adjustedHue, sat, brt));
+            }
+            
+            return colors;
+        }
+        
+        // Generate monochromatic colors
+        function generateMonochromaticColors(baseHsl, count, sat, brt) {
+            const [h, s, l] = baseHsl;
+            const colors = [];
+            const lightnessStep = 90 / (count - 1); // Distribute lightness values
+            
+            for (let i = 0; i < count; i++) {
+                const lightness = 5 + i * lightnessStep; // From 5% to 95%
+                colors.push(hslToHex(h, sat, lightness));
+            }
+            
+            return colors;
+        }
+        
+        // Generate triadic colors
+        function generateTriadicColors(baseHsl, count, sat, brt) {
+            const [h, s, l] = baseHsl;
+            const colors = [hslToHex(h, sat, brt)]; // Start with base color
+            
+            // Add the two triadic colors (120° apart)
+            const triadic1 = (h + 120) % 360;
+            const triadic2 = (h + 240) % 360;
+            
+            colors.push(hslToHex(triadic1, sat, brt));
+            colors.push(hslToHex(triadic2, sat, brt));
+            
+            // If more colors needed, create shades of the triadic colors
+            if (count > 3) {
+                const additionalCount = count - 3;
+                const step = 15; // Lightness step for shades
+                
+                for (let i = 1; i <= additionalCount; i++) {
+                    const lightness = brt + (i % 2 === 0 ? -i * step : i * step);
+                    // Ensure lightness is within 5-95% range
+                    const clampedLightness = Math.max(5, Math.min(95, lightness));
+                    const colorIndex = i % 3;
+                    const hue = colorIndex === 0 ? h : colorIndex === 1 ? triadic1 : triadic2;
+                    colors.push(hslToHex(hue, sat, clampedLightness));
+                }
+            }
+            
+            return colors.slice(0, count);
+        }
+        
+        // Generate complementary colors
+        function generateComplementaryColors(baseHsl, count, sat, brt) {
+            const [h, s, l] = baseHsl;
+            const complementaryHue = (h + 180) % 360;
+            const colors = [hslToHex(h, sat, brt)]; // Base color
+            
+            // Add complementary color
+            colors.push(hslToHex(complementaryHue, sat, brt));
+            
+            // If more colors needed, create shades
+            if (count > 2) {
+                const additionalCount = count - 2;
+                const step = 90 / (additionalCount + 1);
+                
+                for (let i = 1; i <= additionalCount; i++) {
+                    const lightness = 5 + i * step;
+                    // Alternate between base and complementary hues
+                    const hue = i % 2 === 0 ? h : complementaryHue;
+                    colors.push(hslToHex(hue, sat, lightness));
+                }
+            }
+            
+            return colors.slice(0, count);
+        }
+        
+        // Generate split complementary colors
+        function generateSplitComplementaryColors(baseHsl, count, sat, brt) {
+            const [h, s, l] = baseHsl;
+            const split1 = (h + 150) % 360;
+            const split2 = (h + 210) % 360;
+            const colors = [hslToHex(h, sat, brt)]; // Base color
+            
+            // Add split complementary colors
+            colors.push(hslToHex(split1, sat, brt));
+            colors.push(hslToHex(split2, sat, brt));
+            
+            // If more colors needed, create shades
+            if (count > 3) {
+                const additionalCount = count - 3;
+                const step = 90 / (additionalCount + 1);
+                
+                for (let i = 1; i <= additionalCount; i++) {
+                    const lightness = 5 + i * step;
+                    // Cycle through the three hues
+                    const hueIndex = i % 3;
+                    const hue = hueIndex === 0 ? h : hueIndex === 1 ? split1 : split2;
+                    colors.push(hslToHex(hue, sat, lightness));
+                }
+            }
+            
+            return colors.slice(0, count);
+        }
+        
+        // Generate tetradic colors
+        function generateTetradicColors(baseHsl, count, sat, brt) {
+            const [h, s, l] = baseHsl;
+            const tetradic1 = (h + 90) % 360;
+            const tetradic2 = (h + 180) % 360;
+            const tetradic3 = (h + 270) % 360;
+            const colors = [
+                hslToHex(h, sat, brt),
+                hslToHex(tetradic1, sat, brt),
+                hslToHex(tetradic2, sat, brt),
+                hslToHex(tetradic3, sat, brt)
+            ];
+            
+            // If more colors needed, create shades
+            if (count > 4) {
+                const additionalCount = count - 4;
+                const step = 90 / (additionalCount + 1);
+                
+                for (let i = 1; i <= additionalCount; i++) {
+                    const lightness = 5 + i * step;
+                    // Cycle through the four hues
+                    const hueIndex = i % 4;
+                    const hue = hueIndex === 0 ? h : hueIndex === 1 ? tetradic1 : hueIndex === 2 ? tetradic2 : tetradic3;
+                    colors.push(hslToHex(hue, sat, lightness));
+                }
+            }
+            
+            return colors.slice(0, count);
+        }
+        
+        // Generate square colors
+        function generateSquareColors(baseHsl, count, sat, brt) {
+            // Square is similar to tetradic but with 90° increments
+            return generateTetradicColors(baseHsl, count, sat, brt);
+        }
+        
+        // Render the color palette
+        function renderColorPalette(colors) {
+            colorPalette.innerHTML = '';
+            
+            colors.forEach((color, index) => {
+                const colorElement = document.createElement('div');
+                colorElement.className = 'color-box rounded-lg overflow-hidden shadow-md';
+                colorElement.innerHTML = `
+                    <div class="h-24 w-full" style="background-color: ${color};" data-color="${color}"></div>
+                    <div class="p-3 bg-white">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-mono text-sm">${color}</span>
+                            <button class="copy-color p-1 text-gray-500 hover:text-gray-700" title="Copy color">
+                                <i class="fas fa-copy text-xs"></i>
+                            </button>
+                        </div>
+                        <div class="text-xs text-gray-500 font-mono">
+                            RGB: ${hexToRgb(color)}<br>
+                            HSL: ${hexToHsl(color).map(v => Math.round(v)).join(', ')}
+                        </div>
+                    </div>
+                `;
+                
+                // Add click event to copy color
+                const copyBtn = colorElement.querySelector('.copy-color');
+                copyBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    copyToClipboard(color);
+                    addToColorHistory(color);
+                    
+                    // Visual feedback
+                    const btn = e.currentTarget;
+                    btn.innerHTML = '<i class="fas fa-check text-xs"></i>';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="fas fa-copy text-xs"></i>';
+                    }, 2000);
+                });
+                
+                // Click on color box to view larger
+                colorElement.addEventListener('click', function() {
+                    viewColorDetail(color);
+                });
+                
+                colorPalette.appendChild(colorElement);
+            });
+        }
+        
+        // Convert hex to RGB
+        function hexToRgb(hex) {
+            // Remove # if present
+            hex = hex.replace('#', '');
+            
+            // Parse the hex values
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            
+            return `${r}, ${g}, ${b}`;
+        }
+        
+        // Copy text to clipboard
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+        
+        // Add color to history
+        function addToColorHistory(color) {
+            // Avoid duplicates
+            if (!recentColors.includes(color)) {
+                recentColors.unshift(color);
+                
+                // Keep only the last 12 colors
+                if (recentColors.length > 12) {
+                    recentColors.pop();
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('colorHistory', JSON.stringify(recentColors));
+                
+                // Update UI
+                renderColorHistory();
+            }
+        }
+        
+        // Render color history
+        function renderColorHistory() {
+            colorHistory.innerHTML = '';
+            
+            recentColors.forEach(color => {
+                const colorItem = document.createElement('div');
+                colorItem.className = 'color-history-item w-12 h-12 rounded-lg shadow-md';
+                colorItem.style.backgroundColor = color;
+                colorItem.title = color;
+                colorItem.setAttribute('data-color', color);
+                
+                colorItem.addEventListener('click', function() {
+                    baseColorInput.value = color;
+                    baseColorValue.value = color;
+                    generateColorPalette();
+                });
+                
+                colorHistory.appendChild(colorItem);
+            });
+            
+            // Add message if no history
+            if (recentColors.length === 0) {
+                const message = document.createElement('p');
+                message.className = 'text-gray-500 text-sm';
+                message.textContent = 'No recent colors. Copy colors to add them here.';
+                colorHistory.appendChild(message);
+            }
+        }
+        
+        // View color detail (placeholder for future enhancement)
+        function viewColorDetail(color) {
+            // This could be expanded to show a modal with color details
+            console.log('Viewing color:', color);
+        }
+        
+        // Export colors in various formats
+        function exportColors(format) {
+            const colors = Array.from(colorPalette.querySelectorAll('.color-box [data-color]'))
+                .map(el => el.getAttribute('data-color'));
+            
+            let output = '';
+            
+            switch (format) {
+                case 'css':
+                    output = ':root {\n';
+                    colors.forEach((color, index) => {
+                        output += `  --color-${index + 1}: ${color};\n`;
+                    });
+                    output += '}';
+                    break;
+                    
+                case 'scss':
+                    colors.forEach((color, index) => {
+                        output += `$color-${index + 1}: ${color};\n`;
+                    });
+                    break;
+                    
+                case 'json':
+                    const colorObj = {};
+                    colors.forEach((color, index) => {
+                        colorObj[`color${index + 1}`] = color;
+                    });
+                    output = JSON.stringify(colorObj, null, 2);
+                    break;
+            }
+            
+            exportOutput.textContent = output;
+        }
+        
+        // Copy export output to clipboard
+        function copyExportOutput() {
+            copyToClipboard(exportOutput.textContent);
+            
+            // Visual feedback
+            copyOutputBtn.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => {
+                copyOutputBtn.innerHTML = '<i class="fas fa-copy"></i>';
+            }, 2000);
+        }
+        
+        // Copy all colors to clipboard
+        function copyAllColors() {
+            const colors = Array.from(colorPalette.querySelectorAll('.color-box [data-color]'))
+                .map(el => el.getAttribute('data-color'));
+            
+            copyToClipboard(colors.join('\n'));
+            
+            // Visual feedback
+            copyAllBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                copyAllBtn.textContent = 'Copy All';
+            }, 2000);
+        }
+        
+        // Share URL function
+        function shareURL() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Color Generator - Dev Tools',
+                    text: 'Check out this awesome color generator tool!',
+                    url: window.location.href
+                })
+                .catch(error => {
+                    console.log('Error sharing:', error);
+                });
+            } else {
+                alert('Web Share API not supported in your browser. You can copy the URL manually.');
+            }
+        }
+        
+        // Mobile sidebar toggle
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('hidden');
+        });
+        
+        document.getElementById('sidebarOverlay').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.remove('open');
+            overlay.classList.add('hidden');
+        });
+        
+        // Tool search functionality
+        document.getElementById('toolSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const menuItems = document.querySelectorAll('.sidebar-menu-item');
+            
+            menuItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.parentElement.style.display = 'block';
+                } else {
+                    item.parentElement.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Tools - 45+ Free Developer Utilities</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .tool-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(3deg); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .feature-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .scroll-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            z-index: 1000;
+            transition: width 0.1s ease-out;
+        }
+        
+        .navbar-blur {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 overflow-x-hidden">
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator" id="scrollIndicator"></div>
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                        <i class="fas fa-code text-white text-lg"></i>
+                    </div>
+                    <span class="text-2xl font-bold gradient-text">Dev Tools</span>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">Home</a>
+                    <a href="#tools" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">Tools</a>
+                    <a href="#features" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">Features</a>
+                    <a href="#about" class="text-gray-700 hover:text-purple-600 transition-colors font-medium">About</a>
+                </div>
+                
+                <button class="gradient-bg text-white px-6 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
+                    Get Started
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex items-center justify-center relative overflow-hidden pt-20">
+        <div class="absolute inset-0 gradient-bg opacity-5"></div>
+        
+        <!-- Floating Elements -->
+        <div class="absolute top-20 left-10 w-20 h-20 gradient-bg rounded-full opacity-20 floating-animation"></div>
+        <div class="absolute bottom-20 right-10 w-32 h-32 gradient-bg rounded-full opacity-10 floating-animation" style="animation-delay: -2s;"></div>
+        <div class="absolute top-1/3 right-1/4 w-16 h-16 gradient-bg rounded-full opacity-15 floating-animation" style="animation-delay: -4s;"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <div class="mb-8">
+                <span class="inline-block px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-6 pulse-animation">
+                    ✨ 45+ Free Developer Tools
+                </span>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+                Stop <span class="gradient-text">Pasting</span> Code
+                <br>on Random Sites
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-gray-600 mb-12 max-w-4xl mx-auto leading-relaxed">
+                A comprehensive collection of carefully crafted developer tools. 
+                Centralize all your go-to utilities in one convenient location and boost your productivity.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                <button class="gradient-bg text-white px-8 py-4 rounded-xl font-semibold text-lg hover:opacity-90 transition-all transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-rocket mr-2"></i>
+                    Explore Tools
+                </button>
+                <button class="border-2 border-purple-200 text-purple-700 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-purple-50 transition-all">
+                    <i class="fab fa-github mr-2"></i>
+                    View on GitHub
+                </button>
+            </div>
+            
+            <!-- Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mt-16 pt-16 border-t border-gray-200">
+                <div class="text-center">
+                    <div class="text-3xl md:text-4xl font-bold gradient-text">45+</div>
+                    <div class="text-gray-600 font-medium">Tools Available</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl md:text-4xl font-bold gradient-text">100K+</div>
+                    <div class="text-gray-600 font-medium">Developers</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl md:text-4xl font-bold gradient-text">Free</div>
+                    <div class="text-gray-600 font-medium">Forever</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl md:text-4xl font-bold gradient-text">24/7</div>
+                    <div class="text-gray-600 font-medium">Available</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Featured Tools Section -->
+    <section id="tools" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                    Popular <span class="gradient-text">Developer Tools</span>
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    From text manipulation to data conversion, we've got all the tools you need for your daily development workflow.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Tool Cards -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
+                    <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-text-width text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Case Converter</h3>
+                    <p class="text-gray-600 mb-4">Convert text between different cases: uppercase, lowercase, title case, camel case, and more.</p>
+                    <div class="flex items-center text-purple-600 font-medium">
+                        <span>Try it now</span>
+                        <i class="fas fa-arrow-right ml-2 text-sm"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
+                    <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-code text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">JSON Formatter</h3>
+                    <p class="text-gray-600 mb-4">Format, validate, and beautify JSON data with syntax highlighting and error detection.</p>
+                    <div class="flex items-center text-purple-600 font-medium">
+                        <span>Try it now</span>
+                        <i class="fas fa-arrow-right ml-2 text-sm"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
+                    <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-lock text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Password Generator</h3>
+                    <p class="text-gray-600 mb-4">Generate secure passwords with customizable length, characters, and complexity options.</p>
+                    <div class="flex items-center text-purple-600 font-medium">
+                        <span>Try it now</span>
+                        <i class="fas fa-arrow-right ml-2 text-sm"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
+                    <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-exchange-alt text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Base64 Encoder/Decoder</h3>
+                    <p class="text-gray-600 mb-4">Encode and decode Base64 strings quickly and easily with instant results.</p>
+                    <div class="flex items-center text-purple-600 font-medium">
+                        <span>Try it now</span>
+                        <i class="fas fa-arrow-right ml-2 text-sm"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
+                    <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-search text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Regex Tester</h3>
+                    <p class="text-gray-600 mb-4">Test and debug regular expressions with real-time matching and explanation.</p>
+                    <div class="flex items-center text-purple-600 font-medium">
+                        <span>Try it now</span>
+                        <i class="fas fa-arrow-right ml-2 text-sm"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
+                    <div class="w-14 h-14 gradient-bg rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-clock text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">UNIX Timestamp</h3>
+                    <p class="text-gray-600 mb-4">Convert between UNIX timestamps and human-readable dates in various formats.</p>
+                    <div class="flex items-center text-purple-600 font-medium">
+                        <span>Try it now</span>
+                        <i class="fas fa-arrow-right ml-2 text-sm"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <button class="gradient-bg text-white px-8 py-4 rounded-xl font-semibold text-lg hover:opacity-90 transition-all">
+                    View All 45+ Tools
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section id="features" class="py-24 gradient-bg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
+                    Why Choose Dev Tools?
+                </h2>
+                <p class="text-xl text-purple-100 max-w-3xl mx-auto">
+                    Built by developers, for developers. We understand your workflow and created tools that actually make your life easier.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="tool-card rounded-2xl p-8 text-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-bolt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">Lightning Fast</h3>
+                    <p class="text-purple-100">All tools run entirely in your browser. No server delays, no waiting times, just instant results.</p>
+                </div>
+                
+                <div class="tool-card rounded-2xl p-8 text-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-shield-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">Privacy First</h3>
+                    <p class="text-purple-100">Your data never leaves your browser. Everything is processed locally for maximum security and privacy.</p>
+                </div>
+                
+                <div class="tool-card rounded-2xl p-8 text-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-mobile-alt text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">Mobile Friendly</h3>
+                    <p class="text-purple-100">Responsive design that works perfectly on desktop, tablet, and mobile devices.</p>
+                </div>
+                
+                <div class="tool-card rounded-2xl p-8 text-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-heart text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">Free Forever</h3>
+                    <p class="text-purple-100">No subscriptions, no hidden fees, no limits. All tools are completely free to use forever.</p>
+                </div>
+                
+                <div class="tool-card rounded-2xl p-8 text-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-sync text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">Always Updated</h3>
+                    <p class="text-purple-100">Regular updates with new tools and features based on community feedback and requests.</p>
+                </div>
+                
+                <div class="tool-card rounded-2xl p-8 text-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-users text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">Community Driven</h3>
+                    <p class="text-purple-100">Built with input from developers worldwide. Request new tools and help shape the platform.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- About Section -->
+    <section id="about" class="py-24 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                        Built by Developers, 
+                        <span class="gradient-text">For Developers</span>
+                    </h2>
+                    <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                        We as developers realized that it'd be tiring and time consuming to search for each developer tool online just to solve small programming problems on a daily basis. So we decided to create a centralized platform with high quality developer tools.
+                    </p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center mt-1">
+                                <i class="fas fa-check text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-2">No More Tab Switching</h4>
+                                <p class="text-gray-600">Everything you need in one place. No more searching for different tools across multiple websites.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center mt-1">
+                                <i class="fas fa-check text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Carefully Crafted</h4>
+                                <p class="text-gray-600">Each tool is thoughtfully designed with developer experience in mind, not just functionality.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center mt-1">
+                                <i class="fas fa-check text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900 mb-2">Global Community</h4>
+                                <p class="text-gray-600">Assisting web and mobile app developers throughout the world with reliable, fast tools.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="absolute inset-0 gradient-bg rounded-3xl opacity-10"></div>
+                    <div class="relative bg-white rounded-3xl shadow-2xl p-8">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="text-center">
+                                <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-tools text-white"></i>
+                                </div>
+                                <div class="text-2xl font-bold gradient-text">Text Tools</div>
+                                <div class="text-sm text-gray-600">Case, Lorem, Escape</div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-code text-white"></i>
+                                </div>
+                                <div class="text-2xl font-bold gradient-text">Formatters</div>
+                                <div class="text-sm text-gray-600">JSON, XML, SQL</div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-shield-alt text-white"></i>
+                                </div>
+                                <div class="text-2xl font-bold gradient-text">Generators</div>
+                                <div class="text-sm text-gray-600">Passwords, UUIDs</div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center mx-auto mb-3">
+                                    <i class="fas fa-exchange-alt text-white"></i>
+                                </div>
+                                <div class="text-2xl font-bold gradient-text">Converters</div>
+                                <div class="text-sm text-gray-600">Base64, Timestamps</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Section -->
+    <section class="py-24 gradient-bg">
+        <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
+                Ready to Boost Your Productivity?
+            </h2>
+            <p class="text-xl text-purple-100 mb-12 max-w-2xl mx-auto">
+                Join thousands of developers who have already streamlined their workflow with our comprehensive tool collection.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                <button class="bg-white text-purple-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg">
+                    <i class="fas fa-play mr-2"></i>
+                    Start Using Tools
+                </button>
+                <button class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:bg-opacity-10 transition-all">
+                    <i class="fas fa-bookmark mr-2"></i>
+                    Bookmark This Page
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                            <i class="fas fa-code text-white text-lg"></i>
+                        </div>
+                        <span class="text-2xl font-bold">Dev Tools</span>
+                    </div>
+                    <p class="text-gray-400">
+                        45+ free developer tools to boost your productivity and streamline your workflow.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Popular Tools</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">JSON Formatter</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Base64 Encoder</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Password Generator</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Case Converter</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Categories</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors">Text Tools</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Formatters</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Generators</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Converters</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Connect</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors">
+                            <i class="fab fa-discord"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400">&copy; 2024 Dev Tools. All rights reserved.</p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+        
+        // Navbar scroll effect
+        let lastScroll = 0;
+        const navbar = document.getElementById('navbar');
+        
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            // Add blur effect to navbar when scrolled
+            if (currentScroll > 50) {
+                navbar.classList.add('navbar-blur');
+            } else {
+                navbar.classList.remove('navbar-blur');
+            }
+            
+            // Update scroll indicator
+            const scrollIndicator = document.getElementById('scrollIndicator');
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            scrollIndicator.style.width = scrolled + '%';
+            
+            lastScroll = currentScroll;
+        });
+        
+        // Add loading animation to cards on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all cards
+        document.querySelectorAll('.card-hover').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+        
+        // Tool card click handlers
+        document.querySelectorAll('.card-hover').forEach(card => {
+            card.addEventListener('click', function() {
+                const toolName = this.querySelector('h3').textContent;
+                // In a real implementation, this would navigate to the specific tool
+                console.log(`Navigating to ${toolName}`);
+                
+                // Add a visual feedback
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+        
+        // CTA button handlers
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                // Prevent default for demo purposes
+                e.preventDefault();
+                
+                // Add ripple effect
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.position = 'absolute';
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.style.background = 'rgba(255, 255, 255, 0.3)';
+                ripple.style.borderRadius = '50%';
+                ripple.style.pointerEvents = 'none';
+                ripple.style.transform = 'scale(0)';
+                ripple.style.animation = 'ripple 0.6s linear';
+                
+                this.style.position = 'relative';
+                this.style.overflow = 'hidden';
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+        
+        // Add ripple animation to CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+            
+            .card-hover {
+                cursor: pointer;
+            }
+            
+            .card-hover:active {
+                transform: translateY(-4px) scale(0.98);
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Parallax effect for floating elements
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const rate = scrolled * -0.5;
+            const floatingElements = document.querySelectorAll('.floating-animation');
+            
+            floatingElements.forEach((element, index) => {
+                const speed = (index + 1) * 0.3;
+                element.style.transform = `translateY(${rate * speed}px)`;
+            });
+        });
+        
+        // Add keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            // Escape key to close any modals or return to top
+            if (e.key === 'Escape') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            
+            // Space bar to scroll down
+            if (e.key === ' ' && !e.target.matches('input, textarea, button')) {
+                e.preventDefault();
+                window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' });
+            }
+        });
+        
+        // Performance optimization: throttle scroll events
+        function throttle(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // Apply throttling to scroll handlers
+        const throttledScrollHandler = throttle(() => {
+            // Any additional scroll handling can go here
+        }, 16); // ~60fps
+        
+        window.addEventListener('scroll', throttledScrollHandler);
+        
+        // Add some interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate stats counter on scroll
+            const stats = document.querySelectorAll('.text-3xl, .text-4xl');
+            const animateCounter = (element) => {
+                const target = element.textContent;
+                const isNumber = /^\d+\+?$/.test(target);
+                
+                if (isNumber) {
+                    const finalNumber = parseInt(target.replace('+', ''));
+                    let current = 0;
+                    const increment = finalNumber / 50; // 50 steps
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= finalNumber) {
+                            current = finalNumber;
+                            clearInterval(timer);
+                        }
+                        element.textContent = Math.floor(current) + (target.includes('+') ? '+' : '');
+                    }, 40);
+                }
+            };
+            
+            const statsObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        animateCounter(entry.target);
+                        statsObserver.unobserve(entry.target);
+                    }
+                });
+            });
+            
+            stats.forEach(stat => {
+                if (stat.closest('.text-center') && /^\d+/.test(stat.textContent)) {
+                    statsObserver.observe(stat);
+                }
+            });
+        });
+        
+        // Add focus management for accessibility
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                document.body.classList.add('user-is-tabbing');
+            }
+        });
+        
+        document.addEventListener('mousedown', function() {
+            document.body.classList.remove('user-is-tabbing');
+        });
+        
+        // Add focus styles
+        const focusStyle = document.createElement('style');
+        focusStyle.textContent = `
+            .user-is-tabbing *:focus {
+                outline: 3px solid #667eea !important;
+                outline-offset: 2px !important;
+            }
+            
+            :not(.user-is-tabbing) *:focus {
+                outline: none !important;
+            }
+        `;
+        document.head.appendChild(focusStyle);
+    </script>
+</body>
+</html>

@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Formatter Tool - Dev Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu-item {
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-menu-item:hover {
+            transform: translateX(4px);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .sidebar-menu-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .sidebar-menu-item.active i {
+            color: white;
+        }
+
+        .code-output {
+            font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.1;
+            }
+
+            90% {
+                opacity: 0.1;
+            }
+
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 100;
+        }
+
+        .copy-success {
+            animation: copySuccess 2s ease-in-out;
+        }
+
+        @keyframes copySuccess {
+            0% {
+                background-color: #10b981;
+            }
+
+            100% {
+                background-color: #6366f1;
+            }
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-mobile {
+                transform: translateX(-100%);
+            }
+
+            .sidebar-mobile.open {
+                transform: translateX(0);
+            }
+        }
+
+        /* SQL Syntax Highlighting */
+        .sql-keyword {
+            color: #0077aa;
+            font-weight: 600;
+        }
+        
+        .sql-function {
+            color: #d63384;
+        }
+        
+        .sql-string {
+            color: #669900;
+        }
+        
+        .sql-number {
+            color: #ff8800;
+        }
+        
+        .sql-comment {
+            color: #708090;
+            font-style: italic;
+        }
+        
+        .sql-operator {
+            color: #9a6e3a;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Floating Background Elements -->
+    <div class="floating-elements">
+        <div class="floating-element gradient-bg w-20 h-20 rounded-full" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-element gradient-bg w-12 h-12 rounded-full" style="left: 20%; animation-delay: 5s;"></div>
+        <div class="floating-element gradient-bg w-16 h-16 rounded-full" style="left: 30%; animation-delay: 10s;"></div>
+        <div class="floating-element gradient-bg w-8 h-8 rounded-full" style="left: 40%; animation-delay: 15s;"></div>
+        <div class="floating-element gradient-bg w-24 h-24 rounded-full" style="left: 60%; animation-delay: 3s;"></div>
+        <div class="floating-element gradient-bg w-14 h-14 rounded-full" style="left: 70%; animation-delay: 8s;"></div>
+        <div class="floating-element gradient-bg w-10 h-10 rounded-full" style="left: 80%; animation-delay: 12s;"></div>
+        <div class="floating-element gradient-bg w-18 h-18 rounded-full" style="left: 90%; animation-delay: 7s;"></div>
+    </div>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg sidebar-transition fixed md:relative z-20 h-full sidebar-mobile"
+            id="sidebar">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                        <i class="fas fa-code text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">Dev Tools</h1>
+                        <p class="text-xs text-gray-500">45+ Developer Utilities</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="p-4">
+                <div class="relative">
+                    <input type="text" placeholder="Search tools..."
+                        class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        id="toolSearch">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- Menu Categories -->
+            <nav class="flex-1 overflow-y-auto custom-scrollbar">
+                <!-- Text Tools -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Text Tools</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-quote-right w-5 text-purple-500 mr-3"></i>
+                                Text Escape
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-text-width w-5 text-purple-500 mr-3"></i>
+                                Case Converter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-paragraph w-5 text-purple-500 mr-3"></i>
+                                Lorem Ipsum
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-align-left w-5 text-purple-500 mr-3"></i>
+                                Text Formatter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Formatters -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Formatters</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-code w-5 text-purple-500 mr-3"></i>
+                                JSON Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-file-code w-5 text-purple-500 mr-3"></i>
+                                XML Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item active flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-database w-5 text-purple-500 mr-3"></i>
+                                SQL Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fab fa-css3-alt w-5 text-purple-500 mr-3"></i>
+                                CSS Formatter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Generators -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Generators</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-lock w-5 text-purple-500 mr-3"></i>
+                                Password Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-fingerprint w-5 text-purple-500 mr-3"></i>
+                                UUID Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-palette w-5 text-purple-500 mr-3"></i>
+                                Color Generator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Converters -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Converters</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-exchange-alt w-5 text-purple-500 mr-3"></i>
+                                Base64 Encoder
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-clock w-5 text-purple-500 mr-3"></i>
+                                UNIX Timestamp
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-hashtag w-5 text-purple-500 mr-3"></i>
+                                Hash Generator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Testers -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Testers</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-search w-5 text-purple-500 mr-3"></i>
+                                Regex Tester
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-link w-5 text-purple-500 mr-3"></i>
+                                URL Validator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden hidden" id="sidebarOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button class="md:hidden text-gray-600 hover:text-purple-600" id="sidebarToggle">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">SQL Formatter</h2>
+                            <p class="text-sm text-gray-500">Format and beautify your SQL queries with syntax highlighting
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button class="text-gray-600 hover:text-purple-600 transition-colors"
+                            onclick="window.location.href='#'">
+                            <i class="fas fa-home text-lg"></i>
+                        </button>
+                        <button class="text-gray-600 hover:text-purple-600 transition-colors" onclick="shareURL()">
+                            <i class="fas fa-share-alt text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tool Content -->
+            <div class="flex-1 overflow-auto p-6 space-y-6">
+                <!-- Tool Description -->
+                <div class="tool-card rounded-xl p-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-database text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">SQL Formatter Tool</h3>
+                            <p class="text-gray-600 leading-relaxed">
+                                This tool helps you format and beautify your SQL queries for better readability. It supports
+                                syntax highlighting, indentation, and keyword capitalization. Simply paste your SQL code,
+                                click format, and get a clean, readable version of your query.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tool Interface -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Input Section -->
+                    <div class="tool-card rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Input SQL</h3>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200 transition-colors" onclick="clearInput()">
+                                    <i class="fas fa-trash-alt mr-1"></i> Clear
+                                </button>
+                                <button class="px-3 py-1 bg-purple-100 text-purple-700 rounded-md text-sm hover:bg-purple-200 transition-colors" onclick="insertSample()">
+                                    <i class="fas fa-plus-circle mr-1"></i> Sample
+                                </button>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <textarea id="sqlInput" rows="15" class="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm" placeholder="Paste your SQL query here..."></textarea>
+                        </div>
+                        <div class="mt-4 flex justify-between">
+                            <div class="flex items-center space-x-2">
+                                <label class="flex items-center text-sm text-gray-600">
+                                    <input type="checkbox" id="uppercaseKeywords" class="mr-2 rounded text-purple-500 focus:ring-purple-500" checked>
+                                    Uppercase Keywords
+                                </label>
+                                <label class="flex items-center text-sm text-gray-600">
+                                    <input type="checkbox" id="indentQuery" class="mr-2 rounded text-purple-500 focus:ring-purple-500" checked>
+                                    Indent Query
+                                </label>
+                            </div>
+                            <button id="formatBtn" class="px-4 py-2 gradient-bg text-white rounded-lg hover:opacity-90 transition-opacity flex items-center" onclick="formatSQL()">
+                                <i class="fas fa-magic mr-2"></i> Format SQL
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Output Section -->
+                    <div class="tool-card rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Formatted SQL</h3>
+                            <button id="copyBtn" class="px-3 py-1 bg-gray-100 text-gray-700 rounded-md text-sm hover:bg-gray-200 transition-colors" onclick="copyToClipboard()">
+                                <i class="fas fa-copy mr-1"></i> Copy
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <pre id="sqlOutput" class="w-full p-4 border border-gray-200 rounded-lg bg-gray-50 overflow-auto max-h-80 font-mono text-sm" style="min-height: 262px;">Formatted SQL will appear here...</pre>
+                        </div>
+                        <div class="mt-4 flex items-center text-sm text-gray-500">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <span id="charCount">0 characters</span>
+                            <span class="mx-2">•</span>
+                            <span id="lineCount">0 lines</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="tool-card rounded-xl p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">SQL Formatting Tips</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800">Consistent Indentation</h4>
+                                <p class="text-sm text-gray-600">Use consistent indentation (2 or 4 spaces) for nested clauses to improve readability.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800">Keyword Capitalization</h4>
+                                <p class="text-sm text-gray-600">Capitalize SQL keywords (SELECT, FROM, WHERE, etc.) to distinguish them from identifiers.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800">Line Breaks</h4>
+                                <p class="text-sm text-gray-600">Place each major clause on a new line for better structure and scanning.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800">Alignment</h4>
+                                <p class="text-sm text-gray-600">Align similar elements vertically (e.g., column names in SELECT) when it improves readability.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Toggle sidebar on mobile
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('hidden');
+        });
+
+        // Close sidebar when clicking on overlay
+        document.getElementById('sidebarOverlay').addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.remove('open');
+            this.classList.add('hidden');
+        });
+
+        // Search functionality
+        document.getElementById('toolSearch').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const menuItems = document.querySelectorAll('.sidebar-menu-item');
+            
+            menuItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.parentElement.style.display = 'block';
+                } else {
+                    item.parentElement.style.display = 'none';
+                }
+            });
+        });
+
+        // Share URL function
+        function shareURL() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'SQL Formatter Tool - Dev Tools',
+                    url: window.location.href
+                })
+                .catch(console.error);
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                navigator.clipboard.writeText(window.location.href)
+                    .then(() => {
+                        alert('Link copied to clipboard!');
+                    })
+                    .catch(err => {
+                        console.error('Could not copy text: ', err);
+                    });
+            }
+        }
+
+        // SQL Formatting Functions
+        function formatSQL() {
+            const input = document.getElementById('sqlInput').value;
+            const uppercaseKeywords = document.getElementById('uppercaseKeywords').checked;
+            const indentQuery = document.getElementById('indentQuery').checked;
+            
+            if (!input.trim()) {
+                document.getElementById('sqlOutput').textContent = 'Please enter some SQL to format.';
+                updateCounts(0, 0);
+                return;
+            }
+            
+            // Simple SQL formatting logic
+            let formattedSQL = input;
+            
+            // Convert keywords to uppercase if requested
+            if (uppercaseKeywords) {
+                const keywords = [
+                    'SELECT', 'FROM', 'WHERE', 'ORDER BY', 'GROUP BY', 'HAVING', 'JOIN', 
+                    'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'OUTER JOIN', 'ON', 'AS', 
+                    'AND', 'OR', 'NOT', 'IN', 'BETWEEN', 'LIKE', 'IS NULL', 'IS NOT NULL',
+                    'INSERT INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE FROM', 'CREATE TABLE',
+                    'ALTER TABLE', 'DROP TABLE', 'INDEX', 'PRIMARY KEY', 'FOREIGN KEY',
+                    'UNIQUE', 'DEFAULT', 'AUTO_INCREMENT', 'NULL', 'NOT NULL', 'DISTINCT',
+                    'UNION', 'ALL', 'EXISTS', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END'
+                ];
+                
+                keywords.forEach(keyword => {
+                    const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+                    formattedSQL = formattedSQL.replace(regex, keyword);
+                });
+            }
+            
+            // Basic indentation if requested
+            if (indentQuery) {
+                const lines = formattedSQL.split('\n');
+                let indentLevel = 0;
+                const indentSize = 4;
+                
+                formattedSQL = lines.map(line => {
+                    const trimmedLine = line.trim();
+                    
+                    // Decrease indent level for closing clauses
+                    if (trimmedLine.startsWith('END') || 
+                        trimmedLine.startsWith('ELSE') || 
+                        trimmedLine.startsWith('HAVING') || 
+                        trimmedLine.startsWith('WHERE') || 
+                        trimmedLine.startsWith('ORDER BY') || 
+                        trimmedLine.startsWith('GROUP BY') ||
+                        trimmedLine.endsWith(';')) {
+                        indentLevel = Math.max(0, indentLevel - 1);
+                    }
+                    
+                    // Apply current indentation
+                    const indentedLine = ' '.repeat(indentLevel * indentSize) + trimmedLine;
+                    
+                    // Increase indent level for opening clauses
+                    if (trimmedLine.startsWith('CASE') || 
+                        trimmedLine.startsWith('WHEN') || 
+                        trimmedLine.startsWith('THEN') || 
+                        trimmedLine.startsWith('ELSE') || 
+                        trimmedLine.startsWith('AND') || 
+                        trimmedLine.startsWith('OR') ||
+                        trimmedLine.includes(' SELECT ') || 
+                        trimmedLine.includes(' FROM ') || 
+                        trimmedLine.includes(' WHERE ') || 
+                        trimmedLine.includes(' JOIN ')) {
+                        indentLevel++;
+                    }
+                    
+                    return indentedLine;
+                }).join('\n');
+            }
+            
+            // Apply syntax highlighting
+            const highlightedSQL = highlightSQL(formattedSQL);
+            document.getElementById('sqlOutput').innerHTML = highlightedSQL;
+            
+            // Update character and line counts
+            const charCount = formattedSQL.length;
+            const lineCount = formattedSQL.split('\n').length;
+            updateCounts(charCount, lineCount);
+        }
+        
+        function highlightSQL(sql) {
+            // Keyword highlighting
+            const keywords = [
+                'SELECT', 'FROM', 'WHERE', 'ORDER BY', 'GROUP BY', 'HAVING', 'JOIN', 
+                'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', 'OUTER JOIN', 'ON', 'AS', 
+                'AND', 'OR', 'NOT', 'IN', 'BETWEEN', 'LIKE', 'IS NULL', 'IS NOT NULL',
+                'INSERT INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE FROM', 'CREATE TABLE',
+                'ALTER TABLE', 'DROP TABLE', 'INDEX', 'PRIMARY KEY', 'FOREIGN KEY',
+                'UNIQUE', 'DEFAULT', 'AUTO_INCREMENT', 'NULL', 'NOT NULL', 'DISTINCT',
+                'UNION', 'ALL', 'EXISTS', 'CASE', 'WHEN', 'THEN', 'ELSE', 'END'
+            ];
+            
+            // Function highlighting
+            const functions = [
+                'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'COALESCE', 'NULLIF', 'CAST', 
+                'CONVERT', 'DATEADD', 'DATEDIFF', 'GETDATE', 'UPPER', 'LOWER', 
+                'SUBSTRING', 'LEN', 'ROUND', 'CONCAT'
+            ];
+            
+            let highlighted = sql;
+            
+            // Highlight keywords
+            keywords.forEach(keyword => {
+                const regex = new RegExp(`\\b${keyword}\\b`, 'g');
+                highlighted = highlighted.replace(regex, `<span class="sql-keyword">${keyword}</span>`);
+            });
+            
+            // Highlight functions
+            functions.forEach(func => {
+                const regex = new RegExp(`\\b${func}\\b\\(`, 'g');
+                highlighted = highlighted.replace(regex, `<span class="sql-function">${func}</span>(`);
+            });
+            
+            // Highlight strings (single and double quoted)
+            highlighted = highlighted.replace(/'([^']*)'/g, `<span class="sql-string">'$1'</span>`);
+            highlighted = highlighted.replace(/"([^"]*)"/g, `<span class="sql-string">"$1"</span>`);
+            
+            // Highlight numbers
+            highlighted = highlighted.replace(/\b(\d+)\b/g, `<span class="sql-number">$1</span>`);
+            
+            // Highlight comments (-- and /* */)
+            highlighted = highlighted.replace(/--(.*)$/gm, `<span class="sql-comment">--$1</span>`);
+            highlighted = highlighted.replace(/\/\*([\s\S]*?)\*\//g, `<span class="sql-comment">/*$1*/</span>`);
+            
+            // Highlight operators
+            const operators = ['=', '<', '>', '<=', '>=', '<>', '!=', '\\+', '-', '\\*', '/', '%'];
+            operators.forEach(op => {
+                const regex = new RegExp(`\\s(${op})\\s`, 'g');
+                highlighted = highlighted.replace(regex, ` <span class="sql-operator">$1</span> `);
+            });
+            
+            return highlighted;
+        }
+        
+        function updateCounts(charCount, lineCount) {
+            document.getElementById('charCount').textContent = `${charCount} characters`;
+            document.getElementById('lineCount').textContent = `${lineCount} lines`;
+        }
+        
+        function copyToClipboard() {
+            const outputElement = document.getElementById('sqlOutput');
+            const textToCopy = outputElement.textContent;
+            
+            navigator.clipboard.writeText(textToCopy)
+                .then(() => {
+                    const copyBtn = document.getElementById('copyBtn');
+                    copyBtn.innerHTML = '<i class="fas fa-check mr-1"></i> Copied!';
+                    copyBtn.classList.add('copy-success');
+                    
+                    setTimeout(() => {
+                        copyBtn.innerHTML = '<i class="fas fa-copy mr-1"></i> Copy';
+                        copyBtn.classList.remove('copy-success');
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                    alert('Failed to copy to clipboard. Please try again.');
+                });
+        }
+        
+        function clearInput() {
+            document.getElementById('sqlInput').value = '';
+            document.getElementById('sqlOutput').textContent = 'Formatted SQL will appear here...';
+            updateCounts(0, 0);
+        }
+        
+        function insertSample() {
+            const sampleSQL = `SELECT customers.customer_id, customers.first_name, customers.last_name, orders.order_date, products.product_name, order_items.quantity
+FROM customers
+INNER JOIN orders ON customers.customer_id = orders.customer_id
+INNER JOIN order_items ON orders.order_id = order_items.order_id
+INNER JOIN products ON order_items.product_id = products.product_id
+WHERE orders.order_date >= '2023-01-01' AND products.category = 'Electronics'
+ORDER BY customers.last_name, customers.first_name, orders.order_date DESC;`;
+            
+            document.getElementById('sqlInput').value = sampleSQL;
+        }
+        
+        // Initialize counts
+        updateCounts(0, 0);
+    </script>
+</body>
+
+</html>

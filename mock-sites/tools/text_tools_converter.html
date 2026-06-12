@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Converter Tool - Dev Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu-item {
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-menu-item:hover {
+            transform: translateX(4px);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .sidebar-menu-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .sidebar-menu-item.active i {
+            color: white;
+        }
+
+        .code-output {
+            font-family: 'JetBrains Mono', monospace;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.1;
+            }
+
+            90% {
+                opacity: 0.1;
+            }
+
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 100;
+        }
+
+        .copy-success {
+            animation: copySuccess 2s ease-in-out;
+        }
+
+        @keyframes copySuccess {
+            0% {
+                background-color: #10b981;
+            }
+
+            100% {
+                background-color: #6366f1;
+            }
+        }
+
+        .conversion-button {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .conversion-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px -8px rgba(102, 126, 234, 0.4);
+        }
+
+        .conversion-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .char-counter {
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            font-size: 0.75rem;
+            color: #6b7280;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-mobile {
+                transform: translateX(-100%);
+            }
+
+            .sidebar-mobile.open {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Floating Background Elements -->
+    <div class="floating-elements">
+        <div class="floating-element gradient-bg w-20 h-20 rounded-full" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-element gradient-bg w-12 h-12 rounded-full" style="left: 20%; animation-delay: 5s;"></div>
+        <div class="floating-element gradient-bg w-16 h-16 rounded-full" style="left: 30%; animation-delay: 10s;"></div>
+        <div class="floating-element gradient-bg w-8 h-8 rounded-full" style="left: 40%; animation-delay: 15s;"></div>
+        <div class="floating-element gradient-bg w-24 h-24 rounded-full" style="left: 60%; animation-delay: 3s;"></div>
+        <div class="floating-element gradient-bg w-14 h-14 rounded-full" style="left: 70%; animation-delay: 8s;"></div>
+        <div class="floating-element gradient-bg w-10 h-10 rounded-full" style="left: 80%; animation-delay: 12s;"></div>
+        <div class="floating-element gradient-bg w-18 h-18 rounded-full" style="left: 90%; animation-delay: 7s;"></div>
+    </div>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg sidebar-transition fixed md:relative z-20 h-full sidebar-mobile"
+            id="sidebar">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                        <i class="fas fa-code text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">Dev Tools</h1>
+                        <p class="text-xs text-gray-500">45+ Developer Utilities</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="p-4">
+                <div class="relative">
+                    <input type="text" placeholder="Search tools..."
+                        class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        id="toolSearch">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- Menu Categories -->
+            <nav class="flex-1 overflow-y-auto custom-scrollbar">
+                <!-- Text Tools -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Text Tools</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item active flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-text-width w-5 text-purple-500 mr-3"></i>
+                                Case Converter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-quote-right w-5 text-purple-500 mr-3"></i>
+                                Text Escape
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-paragraph w-5 text-purple-500 mr-3"></i>
+                                Lorem Ipsum
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-align-left w-5 text-purple-500 mr-3"></i>
+                                Text Formatter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Formatters -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Formatters</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-code w-5 text-purple-500 mr-3"></i>
+                                JSON Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-file-code w-5 text-purple-500 mr-3"></i>
+                                XML Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-database w-5 text-purple-500 mr-3"></i>
+                                SQL Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fab fa-css3-alt w-5 text-purple-500 mr-3"></i>
+                                CSS Formatter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Generators -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Generators</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-lock w-5 text-purple-500 mr-3"></i>
+                                Password Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-fingerprint w-5 text-purple-500 mr-3"></i>
+                                UUID Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-palette w-5 text-purple-500 mr-3"></i>
+                                Color Generator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Converters -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Converters</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-exchange-alt w-5 text-purple-500 mr-3"></i>
+                                Base64 Encoder
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-clock w-5 text-purple-500 mr-3"></i>
+                                UNIX Timestamp
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-hashtag w-5 text-purple-500 mr-3"></i>
+                                Hash Generator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Testers -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Testers</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-search w-5 text-purple-500 mr-3"></i>
+                                Regex Tester
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-link w-5 text-purple-500 mr-3"></i>
+                                URL Validator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden hidden" id="sidebarOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button class="md:hidden text-gray-600 hover:text-purple-600" id="sidebarToggle">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">Case Converter</h2>
+                            <p class="text-sm text-gray-500">Transform text between different cases instantly</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <span class="pulse-animation w-2 h-2 bg-green-400 rounded-full mr-1.5"></span>
+                                Online
+                            </span>
+                        </div>
+                        <button class="text-gray-600 hover:text-purple-600 transition-colors"
+                            onclick="window.location.href='#'">
+                            <i class="fas fa-home text-lg"></i>
+                        </button>
+                        <button class="text-gray-600 hover:text-purple-600 transition-colors" onclick="shareURL()">
+                            <i class="fas fa-share-alt text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tool Content -->
+            <div class="flex-1 overflow-auto p-6 space-y-6">
+                <!-- Tool Description -->
+                <div class="tool-card rounded-xl p-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-text-width text-white text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Text Case Converter</h3>
+                            <p class="text-gray-600 leading-relaxed">
+                                Transform your text between different cases instantly. Perfect for programming, writing, and content creation. 
+                                Convert between uppercase, lowercase, title case, camelCase, PascalCase, snake_case, kebab-case, and more.
+                            </p>
+                            <!-- Quick Stats -->
+                            <div class="grid grid-cols-4 gap-4 mt-4">
+                                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                    <div class="text-lg font-bold gradient-text" id="charCount">0</div>
+                                    <div class="text-xs text-gray-600">Characters</div>
+                                </div>
+                                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                    <div class="text-lg font-bold gradient-text" id="wordCount">0</div>
+                                    <div class="text-xs text-gray-600">Words</div>
+                                </div>
+                                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                    <div class="text-lg font-bold gradient-text" id="sentenceCount">0</div>
+                                    <div class="text-xs text-gray-600">Sentences</div>
+                                </div>
+                                <div class="text-center p-3 bg-gray-50 rounded-lg">
+                                    <div class="text-lg font-bold gradient-text" id="paragraphCount">0</div>
+                                    <div class="text-xs text-gray-600">Paragraphs</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tool Interface -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Input Section -->
+                    <div class="tool-card rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-edit text-purple-500 mr-2"></i>
+                                Input Text
+                            </h4>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="clearInput()" 
+                                    class="px-3 py-1 text-xs text-gray-600 hover:text-red-600 transition-colors tooltip"
+                                    data-tooltip="Clear text">
+                                    <i class="fas fa-times mr-1"></i>Clear
+                                </button>
+                                <button onclick="loadSample()" 
+                                    class="px-3 py-1 text-xs text-purple-600 hover:text-purple-800 transition-colors tooltip"
+                                    data-tooltip="Load sample text">
+                                    <i class="fas fa-magic mr-1"></i>Sample
+                                </button>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <textarea
+                                id="inputText"
+                                placeholder="Enter or paste your text here to convert between different cases..."
+                                class="w-full h-48 p-4 border border-gray-200 rounded-lg resize-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 mono-font text-sm"
+                                oninput="updateText()"
+                            ></textarea>
+                            <div class="char-counter" id="inputCharCounter">0 characters</div>
+                        </div>
+                    </div>
+
+                    <!-- Output Section -->
+                    <div class="tool-card rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-file-alt text-purple-500 mr-2"></i>
+                                Output Text
+                            </h4>
+                            <div class="flex items-center space-x-2">
+                                <span id="conversionType" class="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">
+                                    Ready
+                                </span>
+                                <button onclick="copyOutput()" 
+                                    class="px-3 py-1 text-xs text-green-600 hover:text-green-800 transition-colors tooltip"
+                                    data-tooltip="Copy to clipboard" id="copyButton">
+                                    <i class="fas fa-copy mr-1"></i>Copy
+                                </button>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <textarea
+                                id="outputText"
+                                readonly
+                                placeholder="Converted text will appear here..."
+                                class="w-full h-48 p-4 border border-gray-200 rounded-lg resize-none bg-gray-50 mono-font text-sm"
+                            ></textarea>
+                            <div class="char-counter" id="outputCharCounter">0 characters</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="tool-card rounded-xl p-6">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-bolt text-purple-500 mr-2"></i>
+                        Quick Convert
+                    </h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                        <button onclick="convertText('uppercase')" 
+                            class="conversion-button px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 tooltip"
+                            data-tooltip="Convert to uppercase">
+                            <i class="fas fa-arrow-up text-purple-600 mb-1 block"></i>
+                            UPPER
+                        </button>
+                        <button onclick="convertText('lowercase')" 
+                            class="conversion-button px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 tooltip"
+                            data-tooltip="Convert to lowercase">
+                            <i class="fas fa-arrow-down text-purple-600 mb-1 block"></i>
+                            lower
+                        </button>
+                        <button onclick="convertText('titlecase')" 
+                            class="conversion-button px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 tooltip"
+                            data-tooltip="Convert to title case">
+                            <i class="fas fa-heading text-purple-600 mb-1 block"></i>
+                            Title
+                        </button>
+                        <button onclick="convertText('sentencecase')" 
+                            class="conversion-button px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 tooltip"
+                            data-tooltip="Convert to sentence case">
+                            <i class="fas fa-font text-purple-600 mb-1 block"></i>
+                            Sentence
+                        </button>
+                        <button onclick="convertText('camelcase')" 
+                            class="conversion-button px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 tooltip"
+                            data-tooltip="Convert to camelCase">
+                            <i class="fas fa-code text-purple-600 mb-1 block"></i>
+                            camelCase
+                        </button>
+                        <button onclick="convertText('pascalcase')" 
+                            class="conversion-button px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 tooltip"
+                            data-tooltip="Convert to PascalCase">
+                            <i class="fas fa-code text-purple-600 mb-1 block"></i>
+                            PascalCase
+                        </button>
+                        <button onclick="convertText('snakecase')" 
+                            class="conversion-button px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 tooltip"
+                            data-tooltip="Convert to snake_case">
+                            <i class="fas fa-link text-purple-600 mb-1 block"></i>
+                            snake_case
+                        </button>
+                        <button onclick="convertText('kebabcase')" 
+                            class="conversion-button px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 tooltip"
+                            data-tooltip="Convert to kebab-case">
+                            <i class="fas fa-minus text-purple-600 mb-1 block"></i>
+                            kebab-case
+                        </button>
+                        <button onclick="convertText('alternating')" 
+                            class="conversion-button px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 tooltip"
+                            data-tooltip="Convert to alternating case">
+                            <i class="fas fa-random text-purple-600 mb-1 block"></i>
+                            aLtErNaTiNg
+                        </button>
+                        <button onclick="convertText('inverse')" 
+                            class="conversion-button px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 tooltip"
+                            data-tooltip="Invert case">
+                            <i class="fas fa-exchange-alt text-purple-600 mb-1 block"></i>
+                            iNVERSE
+                        </button>
+                        <button onclick="removeAccents()" 
+                            class="conversion-button px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 tooltip"
+                            data-tooltip="Remove accents and diacritics">
+                            <i class="fas fa-language text-purple-600 mb-1 block"></i>
+                            No Accents
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Usage Examples -->
+                <div class="tool-card rounded-xl p-6">
+                    <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-lightbulb text-purple-500 mr-2"></i>
+                        Usage Examples & Common Patterns
+                    </h4>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <h5 class="font-medium text-gray-900">Programming Use Cases</h5>
+                            <div class="space-y-3">
+                                <div class="p-4 bg-gray-50 rounded-lg">
+                                    <div class="text-sm text-gray-600 mb-2">Variable Names:</div>
+                                    <div class="mono-font text-sm">
+                                        <div class="text-gray-500">Input: <span class="text-gray-800">"user name"</span></div>
+                                        <div class="text-purple-600">camelCase: <span class="text-gray-800">userName</span></div>
+                                        <div class="text-purple-600">snake_case: <span class="text-gray-800">user_name</span></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 bg-gray-50 rounded-lg">
+                                    <div class="text-sm text-gray-600 mb-2">Class Names:</div>
+                                    <div class="mono-font text-sm">
+                                        <div class="text-gray-500">Input: <span class="text-gray-800">"user profile manager"</span></div>
+                                        <div class="text-purple-600">PascalCase: <span class="text-gray-800">UserProfileManager</span></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 bg-gray-50 rounded-lg">
+                                    <div class="text-sm text-gray-600 mb-2">Constants:</div>
+                                    <div class="mono-font text-sm">
+                                        <div class="text-gray-500">Input: <span class="text-gray-800">"api base url"</span></div>
+                                        <div class="text-purple-600">UPPER: <span class="text-gray-800">API_BASE_URL</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <h5 class="font-medium text-gray-900">Content & SEO</h5>
+                            <div class="space-y-3">
+                                <div class="p-4 bg-gray-50 rounded-lg">
+                                    <div class="text-sm text-gray-600 mb-2">Blog Post Titles:</div>
+                                    <div class="mono-font text-sm">
+                                        <div class="text-gray-500">Input: <span class="text-gray-800">"how to use javascript"</span></div>
+                                        <div class="text-purple-600">Title Case: <span class="text-gray-800">How To Use Javascript</span></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 bg-gray-50 rounded-lg">
+                                    <div class="text-sm text-gray-600 mb-2">URL Slugs:</div>
+                                    <div class="mono-font text-sm">
+                                        <div class="text-gray-500">Input: <span class="text-gray-800">"My Amazing Blog Post"</span></div>
+                                        <div class="text-purple-600">kebab-case: <span class="text-gray-800">my-amazing-blog-post</span></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 bg-gray-50 rounded-lg">
+                                    <div class="text-sm text-gray-600 mb-2">Social Media:</div>
+                                    <div class="mono-font text-sm">
+                                        <div class="text-gray-500">Input: <span class="text-gray-800">"web development tips"</span></div>
+                                        <div class="text-purple-600">Title Case: <span class="text-gray-800">Web Development Tips</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Keyboard Shortcuts -->
+                    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                        <h5 class="font-medium text-gray-900 mb-3 flex items-center">
+                            <i class="fas fa-keyboard text-blue-500 mr-2"></i>
+                            Keyboard Shortcuts
+                        </h5>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div class="flex items-center">
+                                <kbd class="px-2 py-1 bg-white border border-gray-300 rounded text-xs mono-font">Ctrl+Enter</kbd>
+                                <span class="ml-2 text-gray-600">Copy output</span>
+                            </div>
+                            <div class="flex items-center">
+                                <kbd class="px-2 py-1 bg-white border border-gray-300 rounded text-xs mono-font">Ctrl+K</kbd>
+                                <span class="ml-2 text-gray-600">Clear input</span>
+                            </div>
+                            <div class="flex items-center">
+                                <kbd class="px-2 py-1 bg-white border border-gray-300 rounded text-xs mono-font">Ctrl+L</kbd>
+                                <span class="ml-2 text-gray-600">Load sample</span>
+                            </div>
+                            <div class="flex items-center">
+                                <kbd class="px-2 py-1 bg-white border border-gray-300 rounded text-xs mono-font">Ctrl+1-9</kbd>
+                                <span class="ml-2 text-gray-600">Quick convert</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-full opacity-0 transition-all duration-300 z-50">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span>Text copied to clipboard!</span>
+        </div>
+    </div>
+
+    <script>
+        let currentConversion = 'titlecase';
+        
+        // Text conversion functions
+        const textConversions = {
+            uppercase: (text) => text.toUpperCase(),
+            lowercase: (text) => text.toLowerCase(),
+            titlecase: (text) => text.replace(/\w\S*/g, (txt) => 
+                txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+            ),
+            sentencecase: (text) => {
+                return text.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w)/g, (c) => c.toUpperCase());
+            },
+            camelcase: (text) => {
+                return text.toLowerCase()
+                    .replace(/[^a-zA-Z0-9]+(.)/g, (match, chr) => chr.toUpperCase())
+                    .replace(/^[A-Z]/, (match) => match.toLowerCase());
+            },
+            pascalcase: (text) => {
+                return text.toLowerCase()
+                    .replace(/[^a-zA-Z0-9]+(.)/g, (match, chr) => chr.toUpperCase())
+                    .replace(/^[a-z]/, (match) => match.toUpperCase());
+            },
+            snakecase: (text) => {
+                return text.toLowerCase()
+                    .replace(/[^a-zA-Z0-9]+/g, '_')
+                    .replace(/^_+|_+$/g, '');
+            },
+            kebabcase: (text) => {
+                return text.toLowerCase()
+                    .replace(/[^a-zA-Z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+            },
+            alternating: (text) => {
+                return text.split('').map((char, index) => 
+                    index % 2 === 0 ? char.toLowerCase() : char.toUpperCase()
+                ).join('');
+            },
+            inverse: (text) => {
+                return text.split('').map(char => 
+                    char === char.toUpperCase() ? char.toLowerCase() : char.toUpperCase()
+                ).join('');
+            }
+        };
+
+        function convertText(conversionType) {
+            const inputText = document.getElementById('inputText').value;
+            const outputTextarea = document.getElementById('outputText');
+            const conversionTypeSpan = document.getElementById('conversionType');
+            
+            if (!inputText.trim()) {
+                outputTextarea.value = '';
+                conversionTypeSpan.textContent = 'Ready';
+                updateOutputCounter();
+                return;
+            }
+            
+            currentConversion = conversionType;
+            const convertedText = textConversions[conversionType](inputText);
+            outputTextarea.value = convertedText;
+            
+            // Update conversion type indicator
+            const conversionNames = {
+                uppercase: 'UPPERCASE',
+                lowercase: 'lowercase',
+                titlecase: 'Title Case',
+                sentencecase: 'Sentence case',
+                camelcase: 'camelCase',
+                pascalcase: 'PascalCase',
+                snakecase: 'snake_case',
+                kebabcase: 'kebab-case',
+                alternating: 'aLtErNaTiNg',
+                inverse: 'iNVERSE'
+            };
+            
+            conversionTypeSpan.textContent = conversionNames[conversionType];
+            
+            // Update active button
+            document.querySelectorAll('.conversion-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.conversion-button')?.classList.add('active');
+            
+            updateOutputCounter();
+        }
+
+        function removeAccents() {
+            const inputText = document.getElementById('inputText').value;
+            if (!inputText.trim()) return;
+            
+            const outputTextarea = document.getElementById('outputText');
+            const conversionTypeSpan = document.getElementById('conversionType');
+            
+            // Remove accents and diacritics
+            const convertedText = inputText.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            outputTextarea.value = convertedText;
+            conversionTypeSpan.textContent = 'No Accents';
+            
+            updateOutputCounter();
+        }
+
+        function updateText() {
+            updateCounts();
+            if (currentConversion) {
+                convertText(currentConversion);
+            }
+        }
+
+        function updateCounts() {
+            const inputText = document.getElementById('inputText').value;
+            
+            // Character count
+            const charCount = inputText.length;
+            document.getElementById('charCount').textContent = charCount.toLocaleString();
+            document.getElementById('inputCharCounter').textContent = `${charCount.toLocaleString()} characters`;
+            
+            // Word count
+            const wordCount = inputText.trim() ? inputText.trim().split(/\s+/).length : 0;
+            document.getElementById('wordCount').textContent = wordCount.toLocaleString();
+            
+            // Sentence count
+            const sentenceCount = inputText.trim() ? (inputText.match(/[.!?]+/g) || []).length : 0;
+            document.getElementById('sentenceCount').textContent = sentenceCount.toLocaleString();
+            
+            // Paragraph count
+            const paragraphCount = inputText.trim() ? inputText.split(/\n\s*\n/).filter(p => p.trim()).length : 0;
+            document.getElementById('paragraphCount').textContent = paragraphCount.toLocaleString();
+        }
+
+        function updateOutputCounter() {
+            const outputText = document.getElementById('outputText').value;
+            const charCount = outputText.length;
+            document.getElementById('outputCharCounter').textContent = `${charCount.toLocaleString()} characters`;
+        }
+
+        function clearInput() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputText').value = '';
+            document.getElementById('conversionType').textContent = 'Ready';
+            updateCounts();
+            updateOutputCounter();
+            
+            // Remove active state from buttons
+            document.querySelectorAll('.conversion-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+        }
+
+        function loadSample() {
+            const sampleTexts = [
+                "Hello World! This is a sample text for testing the case converter tool.",
+                "the quick brown fox jumps over the lazy dog",
+                "WEB DEVELOPMENT IS AWESOME AND FUN TO LEARN",
+                "user_name, first_name, last_name, email_address",
+                "My Blog Post About JavaScript Tips and Tricks",
+                "Convert This Text To Different Cases",
+                "API_KEY, BASE_URL, DATABASE_CONNECTION",
+                "React Component State Management"
+            ];
+            
+            const randomSample = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
+            document.getElementById('inputText').value = randomSample;
+            updateCounts();
+            if (currentConversion) {
+                convertText(currentConversion);
+            }
+        }
+
+        function copyOutput() {
+            const outputText = document.getElementById('outputText').value;
+            if (!outputText.trim()) return;
+            
+            navigator.clipboard.writeText(outputText).then(() => {
+                showToast();
+                
+                // Add copy success animation
+                const copyButton = document.getElementById('copyButton');
+                copyButton.classList.add('copy-success');
+                copyButton.innerHTML = '<i class="fas fa-check mr-1"></i>Copied!';
+                
+                setTimeout(() => {
+                    copyButton.classList.remove('copy-success');
+                    copyButton.innerHTML = '<i class="fas fa-copy mr-1"></i>Copy';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-full', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-full', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+
+        function shareURL() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Case Converter Tool - Dev Tools',
+                    text: 'Transform text between different cases instantly',
+                    url: window.location.href
+                });
+            } else {
+                // Fallback to copying URL
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    showToast();
+                });
+            }
+        }
+
+        // Sidebar functionality
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        sidebarToggle?.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            sidebarOverlay.classList.toggle('hidden');
+        });
+
+        sidebarOverlay?.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.add('hidden');
+        });
+
+        // Tool search functionality
+        const toolSearch = document.getElementById('toolSearch');
+        toolSearch?.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const menuItems = document.querySelectorAll('.sidebar-menu-item');
+            
+            menuItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                const parent = item.closest('li');
+                if (text.includes(searchTerm)) {
+                    parent.style.display = 'block';
+                } else {
+                    parent.style.display = 'none';
+                }
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + Enter to copy output
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                copyOutput();
+            }
+            
+            // Ctrl/Cmd + K to clear input
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                clearInput();
+                document.getElementById('inputText').focus();
+            }
+            
+            // Ctrl/Cmd + L to load sample
+            if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+                e.preventDefault();
+                loadSample();
+            }
+            
+            // Number keys for quick conversion
+            if (e.key >= '1' && e.key <= '9' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                const conversions = ['uppercase', 'lowercase', 'titlecase', 'sentencecase', 'camelcase', 'pascalcase', 'snakecase', 'kebabcase', 'alternating'];
+                const index = parseInt(e.key) - 1;
+                if (conversions[index]) {
+                    convertText(conversions[index]);
+                }
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCounts();
+            // Focus on input
+            document.getElementById('inputText').focus();
+            
+            // Add ripple effect to conversion buttons
+            document.querySelectorAll('.conversion-button').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.position = 'absolute';
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.style.background = 'rgba(102, 126, 234, 0.3)';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.pointerEvents = 'none';
+                    ripple.style.transform = 'scale(0)';
+                    ripple.style.animation = 'ripple 0.6s linear';
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                sidebar.classList.remove('open');
+                sidebarOverlay.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regex Tester - Dev Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu-item {
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-menu-item:hover {
+            transform: translateX(4px);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .sidebar-menu-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .sidebar-menu-item.active i {
+            color: white;
+        }
+
+        .code-output {
+            font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.1;
+            }
+
+            90% {
+                opacity: 0.1;
+            }
+
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 100;
+        }
+
+        .copy-success {
+            animation: copySuccess 2s ease-in-out;
+        }
+
+        @keyframes copySuccess {
+            0% {
+                background-color: #10b981;
+            }
+
+            100% {
+                background-color: #6366f1;
+            }
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-mobile {
+                transform: translateX(-100%);
+            }
+
+            .sidebar-mobile.open {
+                transform: translateX(0);
+            }
+        }
+
+        /* Regex-specific styles */
+        .regex-match {
+            background-color: #fef08a;
+            padding: 0 2px;
+            border-radius: 2px;
+            border: 1px solid #f59e0b;
+        }
+
+        .regex-error {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .regex-group {
+            background-color: #dbeafe;
+            padding: 0 2px;
+            border-radius: 2px;
+            border: 1px solid #93c5fd;
+        }
+
+        .regex-flags button {
+            transition: all 0.2s ease;
+        }
+
+        .regex-flags button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .regex-reference-item {
+            transition: all 0.2s ease;
+        }
+
+        .regex-reference-item:hover {
+            background-color: #f3f4f6;
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Floating Background Elements -->
+    <div class="floating-elements">
+        <div class="floating-element gradient-bg w-20 h-20 rounded-full" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-element gradient-bg w-12 h-12 rounded-full" style="left: 20%; animation-delay: 5s;"></div>
+        <div class="floating-element gradient-bg w-16 h-16 rounded-full" style="left: 30%; animation-delay: 10s;"></div>
+        <div class="floating-element gradient-bg w-8 h-8 rounded-full" style="left: 40%; animation-delay: 15s;"></div>
+        <div class="floating-element gradient-bg w-24 h-24 rounded-full" style="left: 60%; animation-delay: 3s;"></div>
+        <div class="floating-element gradient-bg w-14 h-14 rounded-full" style="left: 70%; animation-delay: 8s;"></div>
+        <div class="floating-element gradient-bg w-10 h-10 rounded-full" style="left: 80%; animation-delay: 12s;"></div>
+        <div class="floating-element gradient-bg w-18 h-18 rounded-full" style="left: 90%; animation-delay: 7s;"></div>
+    </div>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg sidebar-transition fixed md:relative z-20 h-full sidebar-mobile"
+            id="sidebar">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                        <i class="fas fa-code text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">Dev Tools</h1>
+                        <p class="text-xs text-gray-500">45+ Developer Utilities</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="p-4">
+                <div class="relative">
+                    <input type="text" placeholder="Search tools..."
+                        class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        id="toolSearch">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- Menu Categories -->
+            <nav class="flex-1 overflow-y-auto custom-scrollbar">
+                <!-- Text Tools -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Text Tools</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-quote-right w-5 text-purple-500 mr-3"></i>
+                                Text Escape
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-text-width w-5 text-purple-500 mr-3"></i>
+                                Case Converter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-paragraph w-5 text-purple-500 mr-3"></i>
+                                Lorem Ipsum
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-align-left w-5 text-purple-500 mr-3"></i>
+                                Text Formatter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Formatters -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Formatters</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-code w-5 text-purple-500 mr-3"></i>
+                                JSON Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-file-code w-5 text-purple-500 mr-3"></i>
+                                XML Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-database w-5 text-purple-500 mr-3"></i>
+                                SQL Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fab fa-css3-alt w-5 text-purple-500 mr-3"></i>
+                                CSS Formatter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Generators -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Generators</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-lock w-5 text-purple-500 mr-3"></i>
+                                Password Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-fingerprint w-5 text-purple-500 mr-3"></i>
+                                UUID Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-palette w-5 text-purple-500 mr-3"></i>
+                                Color Generator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Converters -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Converters</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-exchange-alt w-5 text-purple-500 mr-3"></i>
+                                Base64 Encoder
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-clock w-5 text-purple-500 mr-3"></i>
+                                UNIX Timestamp
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-hashtag w-5 text-purple-500 mr-3"></i>
+                                Hash Generator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Testers -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Testers</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item active flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-search w-5 text-purple-500 mr-3"></i>
+                                Regex Tester
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-link w-5 text-purple-500 mr-3"></i>
+                                URL Validator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden hidden" id="sidebarOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button class="md:hidden text-gray-600 hover:text-purple-600" id="sidebarToggle">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">Regex Tester</h2>
+                            <p class="text-sm text-gray-500">Test and debug your regular expressions in real-time
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button class="text-gray-600 hover:text-purple-600 transition-colors"
+                            onclick="window.location.href='#'">
+                            <i class="fas fa-home text-lg"></i>
+                        </button>
+                        <button class="text-gray-600 hover:text-purple-600 transition-colors" onclick="shareURL()">
+                            <i class="fas fa-share-alt text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tool Content -->
+            <div class="flex-1 overflow-auto p-6 space-y-6">
+                <!-- Tool Description -->
+                <div class="tool-card rounded-xl p-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-search text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Regex Tester</h3>
+                            <p class="text-gray-600 leading-relaxed">
+                                Test and debug your regular expressions with this interactive tool. Enter your regex pattern and test string to see matches in real-time. Use flags to modify matching behavior and refer to the cheat sheet for quick syntax reference.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tool Interface -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Left Column: Input and Results -->
+                    <div class="space-y-6">
+                        <!-- Regex Pattern Input -->
+                        <div class="tool-card rounded-xl p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Regular Expression</h3>
+                            <div class="space-y-4">
+                                <div class="relative">
+                                    <input type="text" id="regexPattern" placeholder="Enter your regex pattern (e.g., [A-Za-z]+)"
+                                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono">
+                                    <div class="absolute right-3 top-3 flex space-x-1">
+                                        <button class="text-gray-400 hover:text-purple-600 tooltip" data-tooltip="Clear" onclick="document.getElementById('regexPattern').value = ''; testRegex()">
+                                            <i class="fas fa-times-circle"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Regex Flags -->
+                                <div>
+                                    <h4 class="text-sm font-medium text-gray-700 mb-2">Flags</h4>
+                                    <div class="flex space-x-2 regex-flags">
+                                        <button id="flagG" class="px-3 py-1 bg-gray-100 rounded-md text-sm active" onclick="toggleFlag('g')">Global (g)</button>
+                                        <button id="flagI" class="px-3 py-1 bg-gray-100 rounded-md text-sm" onclick="toggleFlag('i')">Case-insensitive (i)</button>
+                                        <button id="flagM" class="px-3 py-1 bg-gray-100 rounded-md text-sm" onclick="toggleFlag('m')">Multiline (m)</button>
+                                        <button id="flagS" class="px-3 py-1 bg-gray-100 rounded-md text-sm" onclick="toggleFlag('s')">Dotall (s)</button>
+                                        <button id="flagU" class="px-3 py-1 bg-gray-100 rounded-md text-sm" onclick="toggleFlag('u')">Unicode (u)</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Test String Input -->
+                        <div class="tool-card rounded-xl p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Test String</h3>
+                            <textarea id="testString" rows="6" placeholder="Enter text to test against your regex pattern"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                                oninput="testRegex()"></textarea>
+                        </div>
+                        
+                        <!-- Results -->
+                        <div class="tool-card rounded-xl p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Results</h3>
+                            <div id="resultsContainer" class="space-y-4">
+                                <div id="matchCount" class="text-sm text-gray-600">0 matches found</div>
+                                <div id="highlightedText" class="p-4 bg-gray-50 rounded-lg min-h-[100px] border border-gray-200 whitespace-pre-wrap"></div>
+                                <div id="errorMessage" class="hidden p-3 rounded-lg regex-error text-sm"></div>
+                                
+                                <!-- Matches Table -->
+                                <div id="matchesTableContainer" class="hidden">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-2">Match Details</h4>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match</th>
+                                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Index</th>
+                                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Groups</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="matchesTableBody" class="bg-white divide-y divide-gray-200">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Reference and Explanation -->
+                    <div class="space-y-6">
+                        <!-- Quick Reference -->
+                        <div class="tool-card rounded-xl p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Regex Quick Reference</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <h4 class="text-sm font-medium text-gray-700">Character Classes</h4>
+                                    <div class="text-sm space-y-1">
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">.</code> Any character
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">\d</code> Digit
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">\w</code> Word character
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">\s</code> Whitespace
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">[abc]</code> Any of a, b, or c
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">[^abc]</code> Not a, b, or c
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <h4 class="text-sm font-medium text-gray-700">Quantifiers</h4>
+                                    <div class="text-sm space-y-1">
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">a*</code> 0 or more
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">a+</code> 1 or more
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">a?</code> 0 or 1
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">a{3}</code> Exactly 3
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">a{3,}</code> 3 or more
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">a{3,5}</code> 3 to 5
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <h4 class="text-sm font-medium text-gray-700">Anchors</h4>
+                                    <div class="text-sm space-y-1">
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">^</code> Start of string
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">$</code> End of string
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">\b</code> Word boundary
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <h4 class="text-sm font-medium text-gray-700">Groups & Lookaround</h4>
+                                    <div class="text-sm space-y-1">
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">(abc)</code> Capture group
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">(?:abc)</code> Non-capturing group
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">(?=abc)</code> Positive lookahead
+                                        </div>
+                                        <div class="regex-reference-item p-2 rounded-md">
+                                            <code class="font-mono bg-gray-100 px-1 py-0.5 rounded">(?!abc)</code> Negative lookahead
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Explanation -->
+                        <div class="tool-card rounded-xl p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Explanation</h3>
+                            <div id="explanation" class="text-sm text-gray-600 p-4 bg-gray-50 rounded-lg">
+                                Enter a regex pattern to see an explanation here.
+                            </div>
+                        </div>
+                        
+                        <!-- Sample Patterns -->
+                        <div class="tool-card rounded-xl p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Sample Patterns</h3>
+                            <div class="space-y-2">
+                                <button class="w-full text-left p-2 hover:bg-gray-50 rounded-md text-sm" onclick="loadSample('Email', '^[\\w.-]+@[\\w.-]+\\.\\w+$', 'contact@example.com\ninvalid.email@com\nsupport@company.org')">
+                                    <div class="font-medium">Email Validation</div>
+                                    <div class="text-gray-500 font-mono text-xs">^[\w.-]+@[\w.-]+\.\w+$</div>
+                                </button>
+                                
+                                <button class="w-full text-left p-2 hover:bg-gray-50 rounded-md text-sm" onclick="loadSample('URL', 'https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$', 'https://example.com\nhttp://sub.domain.co.uk/path?query=value\ninvalid-url')">
+                                    <div class="font-medium">URL Extraction</div>
+                                    <div class="text-gray-500 font-mono text-xs">https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$</div>
+                                </button>
+                                
+                                <button class="w-full text-left p-2 hover:bg-gray-50 rounded-md text-sm" onclick="loadSample('Phone', '\\b\\d{3}[-.]?\\d{3}[-.]?\\d{4}\\b', '123-456-7890\n555.123.4567\n1234567890\n12-345-6789')">
+                                    <div class="font-medium">Phone Numbers</div>
+                                    <div class="text-gray-500 font-mono text-xs">\b\d{3}[-.]?\d{3}[-.]?\d{4}\b</div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // DOM elements
+        const regexPattern = document.getElementById('regexPattern');
+        const testString = document.getElementById('testString');
+        const matchCount = document.getElementById('matchCount');
+        const highlightedText = document.getElementById('highlightedText');
+        const errorMessage = document.getElementById('errorMessage');
+        const matchesTableContainer = document.getElementById('matchesTableContainer');
+        const matchesTableBody = document.getElementById('matchesTableBody');
+        const explanation = document.getElementById('explanation');
+        
+        // Active flags
+        let activeFlags = 'g';
+        
+        // Toggle flag
+        function toggleFlag(flag) {
+            const button = document.getElementById(`flag${flag.toUpperCase()}`);
+            
+            if (activeFlags.includes(flag)) {
+                activeFlags = activeFlags.replace(flag, '');
+                button.classList.remove('active');
+            } else {
+                activeFlags += flag;
+                button.classList.add('active');
+            }
+            
+            testRegex();
+        }
+        
+        // Test regex function
+        function testRegex() {
+            const pattern = regexPattern.value;
+            const text = testString.value;
+            
+            // Reset UI
+            matchCount.textContent = '0 matches found';
+            highlightedText.innerHTML = '';
+            errorMessage.classList.add('hidden');
+            matchesTableContainer.classList.add('hidden');
+            matchesTableBody.innerHTML = '';
+            
+            if (!pattern) {
+                explanation.textContent = 'Enter a regex pattern to see an explanation here.';
+                return;
+            }
+            
+            if (!text) {
+                explanation.textContent = 'Enter a test string to see matches.';
+                return;
+            }
+            
+            try {
+                // Create regex with active flags
+                const regex = new RegExp(pattern, activeFlags);
+                
+                // Test for matches
+                const matches = [...text.matchAll(regex)];
+                
+                // Update match count
+                matchCount.textContent = `${matches.length} match${matches.length !== 1 ? 'es' : ''} found`;
+                
+                // Highlight matches in the text
+                let lastIndex = 0;
+                let highlightedHtml = '';
+                
+                for (const match of matches) {
+                    // Add text before match
+                    highlightedHtml += escapeHtml(text.slice(lastIndex, match.index));
+                    
+                    // Add matched text with highlight
+                    highlightedHtml += `<span class="regex-match">${escapeHtml(match[0])}</span>`;
+                    
+                    lastIndex = match.index + match[0].length;
+                }
+                
+                // Add remaining text
+                highlightedHtml += escapeHtml(text.slice(lastIndex));
+                
+                highlightedText.innerHTML = highlightedHtml;
+                
+                // Populate matches table
+                if (matches.length > 0) {
+                    matchesTableContainer.classList.remove('hidden');
+                    
+                    matches.forEach((match, index) => {
+                        const row = document.createElement('tr');
+                        
+                        // Match number
+                        const numCell = document.createElement('td');
+                        numCell.className = 'px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900';
+                        numCell.textContent = index + 1;
+                        
+                        // Match text
+                        const matchCell = document.createElement('td');
+                        matchCell.className = 'px-4 py-2 text-sm text-gray-900 font-mono';
+                        matchCell.textContent = match[0];
+                        
+                        // Match index
+                        const indexCell = document.createElement('td');
+                        indexCell.className = 'px-4 py-2 whitespace-nowrap text-sm text-gray-900';
+                        indexCell.textContent = match.index;
+                        
+                        // Groups
+                        const groupsCell = document.createElement('td');
+                        groupsCell.className = 'px-4 py-2 text-sm text-gray-900';
+                        
+                        if (match.length > 1) {
+                            const groups = [];
+                            for (let i = 1; i < match.length; i++) {
+                                if (match[i] !== undefined) {
+                                    groups.push(`<span class="regex-group">${escapeHtml(match[i])}</span>`);
+                                }
+                            }
+                            groupsCell.innerHTML = groups.join(' ') || '-';
+                        } else {
+                            groupsCell.textContent = '-';
+                        }
+                        
+                        row.appendChild(numCell);
+                        row.appendChild(matchCell);
+                        row.appendChild(indexCell);
+                        row.appendChild(groupsCell);
+                        
+                        matchesTableBody.appendChild(row);
+                    });
+                }
+                
+                // Generate explanation
+                generateExplanation(pattern);
+                
+            } catch (error) {
+                errorMessage.textContent = `Error: ${error.message}`;
+                errorMessage.classList.remove('hidden');
+                explanation.textContent = 'Invalid regular expression pattern.';
+            }
+        }
+        
+        // Generate explanation for regex pattern
+        function generateExplanation(pattern) {
+            // This is a simplified explanation generator
+            // A real implementation would parse the regex and provide detailed explanations
+            
+            let explanationText = `Pattern: /${pattern}/${activeFlags}\n\n`;
+            
+            // Basic pattern analysis
+            if (pattern.includes('^')) explanationText += '• ^ matches the start of a string or line\n';
+            if (pattern.includes('$')) explanationText += '• $ matches the end of a string or line\n';
+            if (pattern.includes('.')) explanationText += '• . matches any character except line terminators\n';
+            if (pattern.includes('\\d')) explanationText += '• \\d matches any digit (0-9)\n';
+            if (pattern.includes('\\w')) explanationText += '• \\w matches any word character (a-z, A-Z, 0-9, _)\n';
+            if (pattern.includes('\\s')) explanationText += '• \\s matches any whitespace character\n';
+            if (pattern.includes('*')) explanationText += '• * quantifier matches 0 or more of the preceding element\n';
+            if (pattern.includes('+')) explanationText += '• + quantifier matches 1 or more of the preceding element\n';
+            if (pattern.includes('?')) explanationText += '• ? quantifier matches 0 or 1 of the preceding element\n';
+            if (pattern.includes('{')) explanationText += '• {n} quantifier matches exactly n occurrences\n';
+            if (pattern.includes('[')) explanationText += '• [abc] matches any character in the brackets\n';
+            if (pattern.includes('(')) explanationText += '• (abc) creates a capture group\n';
+            
+            if (explanationText === `Pattern: /${pattern}/${activeFlags}\n\n`) {
+                explanationText += 'This is a literal text match pattern.';
+            }
+            
+            explanation.textContent = explanationText;
+        }
+        
+        // Load sample pattern
+        function loadSample(name, pattern, sampleText) {
+            regexPattern.value = pattern;
+            testString.value = sampleText;
+            testRegex();
+            
+            // Update page title briefly to show sample name
+            const originalTitle = document.title;
+            document.title = `${name} Sample - ${originalTitle}`;
+            setTimeout(() => { document.title = originalTitle; }, 2000);
+        }
+        
+        // Utility function to escape HTML
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+        
+        // Initialize event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            regexPattern.addEventListener('input', testRegex);
+            
+            // Sidebar toggle for mobile
+            document.getElementById('sidebarToggle').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('open');
+                document.getElementById('sidebarOverlay').classList.toggle('hidden');
+            });
+            
+            document.getElementById('sidebarOverlay').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.remove('open');
+                this.classList.add('hidden');
+            });
+            
+            // Tool search functionality
+            document.getElementById('toolSearch').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const menuItems = document.querySelectorAll('.sidebar-menu-item');
+                
+                menuItems.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        item.parentElement.style.display = 'block';
+                    } else {
+                        item.parentElement.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Load a simple sample on first visit
+            if (!localStorage.getItem('regexFirstVisit')) {
+                setTimeout(() => {
+                    loadSample('Simple Word', '\\w+', 'This is a sample text with several words.');
+                    localStorage.setItem('regexFirstVisit', 'true');
+                }, 1000);
+            }
+        });
+        
+        // Share URL function
+        function shareURL() {
+            // In a real implementation, this would generate a shareable URL
+            alert('Share functionality would generate a URL with your regex pattern and test text.');
+        }
+    </script>
+</body>
+
+</html>

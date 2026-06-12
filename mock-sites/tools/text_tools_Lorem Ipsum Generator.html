@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lorem Ipsum Generator - Dev Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .sidebar-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        .sidebar-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+        
+        .sidebar-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .sidebar-item {
+            transition: all 0.2s ease;
+        }
+        
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(4px);
+        }
+        
+        .sidebar-item.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-right: 3px solid #ffffff;
+        }
+        
+        .tool-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .generated-text {
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            text-align: justify;
+        }
+        
+        .word-count-animation {
+            animation: countUp 0.5s ease-out;
+        }
+        
+        @keyframes countUp {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .option-card {
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        
+        .option-card:hover {
+            border-color: #e0e7ff;
+            transform: translateY(-2px);
+        }
+        
+        .option-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        }
+        
+        .copy-success {
+            animation: copyFeedback 2s ease-in-out;
+        }
+        
+        @keyframes copyFeedback {
+            0% { background-color: #10b981; }
+            100% { background-color: #374151; }
+        }
+        
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .custom-slider {
+            background: #e5e7eb;
+            border-radius: 50px;
+            height: 8px;
+            outline: none;
+        }
+        
+        .custom-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .custom-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Mobile Menu Button -->
+    <button id="mobile-menu-btn" class="lg:hidden fixed top-4 left-4 z-50 bg-purple-600 text-white p-2 rounded-lg shadow-lg">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div id="sidebar" class="w-80 gradient-bg text-white shadow-2xl transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out fixed lg:relative z-40 h-full">
+            <div class="p-6 border-b border-white border-opacity-20">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-code text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Dev Tools</h1>
+                        <p class="text-purple-100 text-sm">45+ Developer Utilities</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto sidebar-scrollbar p-4">
+                <div class="space-y-2">
+                    <!-- Text Tools Category -->
+                    <div class="mb-4">
+                        <h3 class="text-purple-200 text-xs font-semibold uppercase tracking-wide mb-2 px-3">Text Tools</h3>
+                        <div class="space-y-1">
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-text-width text-purple-200 w-4"></i>
+                                <span class="text-sm">Case Converter</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-not-equal text-purple-200 w-4"></i>
+                                <span class="text-sm">Text Diff</span>
+                            </a>
+                            <a href="#" class="sidebar-item active flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-paragraph text-purple-200 w-4"></i>
+                                <span class="text-sm">Lorem Ipsum</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-quote-right text-purple-200 w-4"></i>
+                                <span class="text-sm">Text Escape</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Formatters Category -->
+                    <div class="mb-4">
+                        <h3 class="text-purple-200 text-xs font-semibold uppercase tracking-wide mb-2 px-3">Formatters</h3>
+                        <div class="space-y-1">
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-code text-purple-200 w-4"></i>
+                                <span class="text-sm">JSON Formatter</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-code text-purple-200 w-4"></i>
+                                <span class="text-sm">XML Formatter</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-database text-purple-200 w-4"></i>
+                                <span class="text-sm">SQL Formatter</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-file-code text-purple-200 w-4"></i>
+                                <span class="text-sm">HTML Formatter</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-paint-brush text-purple-200 w-4"></i>
+                                <span class="text-sm">CSS Formatter</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Converters Category -->
+                    <div class="mb-4">
+                        <h3 class="text-purple-200 text-xs font-semibold uppercase tracking-wide mb-2 px-3">Converters</h3>
+                        <div class="space-y-1">
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-exchange-alt text-purple-200 w-4"></i>
+                                <span class="text-sm">Base64 Encoder/Decoder</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-clock text-purple-200 w-4"></i>
+                                <span class="text-sm">UNIX Timestamp</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-palette text-purple-200 w-4"></i>
+                                <span class="text-sm">Color Converter</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-link text-purple-200 w-4"></i>
+                                <span class="text-sm">URL Encoder/Decoder</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Generators Category -->
+                    <div class="mb-4">
+                        <h3 class="text-purple-200 text-xs font-semibold uppercase tracking-wide mb-2 px-3">Generators</h3>
+                        <div class="space-y-1">
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-lock text-purple-200 w-4"></i>
+                                <span class="text-sm">Password Generator</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-fingerprint text-purple-200 w-4"></i>
+                                <span class="text-sm">UUID Generator</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-random text-purple-200 w-4"></i>
+                                <span class="text-sm">Random Data</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-hashtag text-purple-200 w-4"></i>
+                                <span class="text-sm">Hash Generator</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Validators Category -->
+                    <div class="mb-4">
+                        <h3 class="text-purple-200 text-xs font-semibold uppercase tracking-wide mb-2 px-3">Validators</h3>
+                        <div class="space-y-1">
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-search text-purple-200 w-4"></i>
+                                <span class="text-sm">Regex Tester</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-code text-purple-200 w-4"></i>
+                                <span class="text-sm">JSON Validator</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-file-code text-purple-200 w-4"></i>
+                                <span class="text-sm">XML Validator</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-envelope text-purple-200 w-4"></i>
+                                <span class="text-sm">Email Validator</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Utilities Category -->
+                    <div class="mb-4">
+                        <h3 class="text-purple-200 text-xs font-semibold uppercase tracking-wide mb-2 px-3">Utilities</h3>
+                        <div class="space-y-1">
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-qrcode text-purple-200 w-4"></i>
+                                <span class="text-sm">QR Code Generator</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-image text-purple-200 w-4"></i>
+                                <span class="text-sm">Image Optimizer</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-compress text-purple-200 w-4"></i>
+                                <span class="text-sm">Minifier</span>
+                            </a>
+                            <a href="#" class="sidebar-item flex items-center space-x-3 px-3 py-2 rounded-lg">
+                                <i class="fas fa-eye text-purple-200 w-4"></i>
+                                <span class="text-sm">Encoder Viewer</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer in sidebar -->
+            <div class="p-4 border-t border-white border-opacity-20">
+                <div class="text-center">
+                    <p class="text-purple-200 text-xs">© 2024 Dev Tools</p>
+                    <p class="text-purple-300 text-xs mt-1">Free Forever</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Overlay for mobile -->
+        <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden hidden"></div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 lg:ml-0 overflow-auto">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center">
+                            <i class="fas fa-paragraph text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900">Lorem Ipsum Generator</h1>
+                            <p class="text-gray-600">Generate placeholder text for your designs and mockups</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="hidden md:flex items-center space-x-2 text-sm text-gray-600">
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                            <span>Classic placeholder text since 1500s</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Main Content Area -->
+            <main class="p-6 max-w-7xl mx-auto">
+                <!-- Quick Actions -->
+                <div class="tool-card rounded-xl p-6 mb-6 shadow-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Generate</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <button class="quick-gen-btn option-card p-4 rounded-lg text-center hover:shadow-md" data-type="paragraphs" data-count="3">
+                            <div class="text-2xl mb-2">📝</div>
+                            <div class="font-medium">3 Paragraphs</div>
+                            <div class="text-xs text-gray-500">~150 words</div>
+                        </button>
+                        <button class="quick-gen-btn option-card p-4 rounded-lg text-center hover:shadow-md" data-type="words" data-count="50">
+                            <div class="text-2xl mb-2">💬</div>
+                            <div class="font-medium">50 Words</div>
+                            <div class="text-xs text-gray-500">Short snippet</div>
+                        </button>
+                        <button class="quick-gen-btn option-card p-4 rounded-lg text-center hover:shadow-md" data-type="sentences" data-count="10">
+                            <div class="text-2xl mb-2">📄</div>
+                            <div class="font-medium">10 Sentences</div>
+                            <div class="text-xs text-gray-500">Medium text</div>
+                        </button>
+                        <button class="quick-gen-btn option-card p-4 rounded-lg text-center hover:shadow-md" data-type="lists" data-count="5">
+                            <div class="text-2xl mb-2">📋</div>
+                            <div class="font-medium">5 List Items</div>
+                            <div class="text-xs text-gray-500">Bullet points</div>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Custom Generator -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Generator Options -->
+                    <div class="tool-card rounded-xl p-6 shadow-lg">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-6">Custom Generator</h3>
+                        
+                        <!-- Text Type Tabs -->
+                        <div class="flex flex-wrap mb-6 bg-gray-100 p-1 rounded-lg">
+                            <button class="tab-button active flex-1 px-4 py-2 text-sm font-medium rounded-md" data-type="paragraphs">
+                                <i class="fas fa-align-left mr-2"></i>Paragraphs
+                            </button>
+                            <button class="tab-button flex-1 px-4 py-2 text-sm font-medium rounded-md" data-type="words">
+                                <i class="fas fa-font mr-2"></i>Words
+                            </button>
+                            <button class="tab-button flex-1 px-4 py-2 text-sm font-medium rounded-md" data-type="sentences">
+                                <i class="fas fa-quote-left mr-2"></i>Sentences
+                            </button>
+                            <button class="tab-button flex-1 px-4 py-2 text-sm font-medium rounded-md" data-type="lists">
+                                <i class="fas fa-list mr-2"></i>Lists
+                            </button>
+                        </div>
+                        
+                        <!-- Amount Control -->
+                        <div class="mb-6">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="text-sm font-medium text-gray-700">Amount</label>
+                                <span id="amount-display" class="text-lg font-bold gradient-text">5</span>
+                            </div>
+                            <input 
+                                type="range" 
+                                id="amount-slider" 
+                                min="1" 
+                                max="20" 
+                                value="5" 
+                                class="w-full custom-slider"
+                            >
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>1</span>
+                                <span>20</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Options -->
+                        <div class="space-y-4 mb-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <label class="font-medium text-gray-700">Start with "Lorem ipsum"</label>
+                                    <p class="text-xs text-gray-500">Begin with classic opening</p>
+                                </div>
+                                <input type="checkbox" id="start-lorem" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500" checked>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <label class="font-medium text-gray-700">HTML Tags</label>
+                                    <p class="text-xs text-gray-500">Wrap in paragraph tags</p>
+                                </div>
+                                <input type="checkbox" id="html-tags" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <label class="font-medium text-gray-700">Random Length</label>
+                                    <p class="text-xs text-gray-500">Vary paragraph lengths</p>
+                                </div>
+                                <input type="checkbox" id="random-length" class="rounded border-gray-300 text-purple-600 focus:ring-purple-500">
+                            </div>
+                        </div>
+                        
+                        <!-- Generate Button -->
+                        <button id="generate-btn" class="w-full gradient-bg text-white py-3 rounded-lg font-semibold text-lg hover:opacity-90 transition-all transform hover:scale-105 shadow-lg">
+                            <i class="fas fa-magic mr-2"></i>Generate Lorem Ipsum
+                        </button>
+                    </div>
+                    
+                    <!-- Text Variants -->
+                    <div class="tool-card rounded-xl p-6 shadow-lg">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Text Variants</h3>
+                        <div class="space-y-3">
+                            <button class="variant-btn w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all" data-variant="classic">
+                                <div class="font-medium text-gray-900">Classic Lorem Ipsum</div>
+                                <div class="text-sm text-gray-600">Traditional Latin placeholder text</div>
+                            </button>
+                            
+                            <button class="variant-btn w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all" data-variant="hipster">
+                                <div class="font-medium text-gray-900">Hipster Ipsum</div>
+                                <div class="text-sm text-gray-600">Trendy artisanal placeholder text</div>
+                            </button>
+                            
+                            <button class="variant-btn w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all" data-variant="pirate">
+                                <div class="font-medium text-gray-900">Pirate Ipsum</div>
+                                <div class="text-sm text-gray-600">Ahoy! Nautical placeholder text</div>
+                            </button>
+                            
+                            <button class="variant-btn w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all" data-variant="tech">
+                                <div class="font-medium text-gray-900">Tech Ipsum</div>
+                                <div class="text-sm text-gray-600">Developer-friendly buzzwords</div>
+                            </button>
+                            
+                            <button class="variant-btn w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all" data-variant="zombie">
+                                <div class="font-medium text-gray-900">Zombie Ipsum</div>
+                                <div class="text-sm text-gray-600">Undead placeholder text... brains!</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Generated Text Display -->
+                <div class="tool-card rounded-xl p-6 shadow-lg">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Generated Text</h3>
+                        <div class="flex items-center space-x-3">
+                            <div class="text-sm text-gray-600">
+                                <span class="word-count-animation" id="word-count">0</span> words,
+                                <span class="word-count-animation" id="char-count">0</span> characters
+                            </div>
+                            <button id="copy-btn" class="px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors">
+                                <i class="fas fa-copy mr-2"></i>Copy
+                            </button>
+                            <button id="clear-btn" class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors">
+                                <i class="fas fa-trash mr-2"></i>Clear
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="output-container" class="min-h-64 max-h-96 overflow-y-auto p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                        <div id="empty-state" class="text-center text-gray-500 py-12">
+                            <div class="floating-animation mb-4">
+                                <i class="fas fa-file-alt text-4xl text-gray-400"></i>
+                            </div>
+                            <p class="text-lg font-medium">No text generated yet</p>
+                            <p class="text-sm">Use the quick actions or custom generator to create placeholder text</p>
+                        </div>
+                        <div id="generated-output" class="generated-text text-gray-800 hidden"></div>
+                    </div>
+                </div>
+                
+                <!-- History Section -->
+                <div class="tool-card rounded-xl p-6 shadow-lg mt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Recent Generations</h3>
+                        <button id="clear-history-btn" class="text-sm text-gray-500 hover:text-red-600 transition-colors">
+                            <i class="fas fa-trash mr-1"></i>Clear History
+                        </button>
+                    </div>
+                    <div id="history-container" class="space-y-2 max-h-40 overflow-y-auto">
+                        <div id="history-empty" class="text-center text-gray-500 py-4">
+                            <i class="fas fa-history text-2xl text-gray-400 mb-2"></i>
+                            <p>No generation history yet</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tips and Info Section -->
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="tool-card rounded-xl p-6 shadow-lg">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>About Lorem Ipsum
+                        </h4>
+                        <div class="space-y-3 text-sm text-gray-700">
+                            <p>
+                                Lorem Ipsum is placeholder text used in the printing and typesetting industry since the 1500s, 
+                                when an unknown printer scrambled a type specimen book.
+                            </p>
+                            <p>
+                                It has survived not only five centuries, but also the leap into electronic typesetting, 
+                                remaining essentially unchanged.
+                            </p>
+                            <p>
+                                The text is derived from sections 1.10.32 and 1.10.33 of "de Finibus Bonorum et Malorum" 
+                                by Cicero, written in 45 BC.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-card rounded-xl p-6 shadow-lg">
+                        <h4 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-rocket text-purple-500 mr-2"></i>Pro Tips
+                        </h4>
+                        <ul class="space-y-2 text-sm text-gray-700">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5"></i>
+                                Use different variants to match your project's tone and style
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5"></i>
+                                Enable HTML tags for web development and email templates
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5"></i>
+                                Use random length for more natural-looking paragraphs
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mr-2 mt-0.5"></i>
+                                Save frequently used generations in your browser bookmarks
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script>
+        // Lorem Ipsum text databases
+        const loremTexts = {
+            classic: [
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+                "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+                "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+                "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.",
+                "Totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.",
+                "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos.",
+                "Qui ratione voluptatem sequi nesciunt, neque porro quisquam est, qui dolorem ipsum quia dolor sit amet.",
+                "Consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.",
+                "Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur."
+            ],
+            hipster: [
+                "Artisan craft beer sustainable, organic locavore farm-to-table authentic vinyl record player.",
+                "Fixie bicycle messenger bag, kale chips seitan quinoa sustainable ethical fashion axe.",
+                "Sriracha authentic DIY, small batch cold-pressed juice cleanse meditation mindfulness.",
+                "Vintage typewriter Brooklyn beard, artisanal coffee roasting sustainable living.",
+                "Kombucha fermentation process, gluten-free superfood smoothie bowl acai berries.",
+                "Minimalist aesthetic design, curated lifestyle brand sustainable fashion conscious."
+            ],
+            pirate: [
+                "Ahoy matey! Batten down the hatches, we be sailin' into treacherous waters ahead.",
+                "Shiver me timbers, that be a fine treasure chest filled with doubloons and pieces of eight.",
+                "Yo ho ho and a bottle of rum, the crew be singin' shanties under the moonlight.",
+                "Avast ye scurvy dogs, prepare to board the enemy vessel at dawn's first light.",
+                "Dead men tell no tales, but legends of buried treasure live on forever.",
+                "Sail ho on the starboard bow, flying the black flag of the notorious Captain Blackbeard."
+            ],
+            tech: [
+                "Implementing scalable microservices architecture with containerized deployment strategies and automated CI/CD pipelines.",
+                "Machine learning algorithms optimize user experience through predictive analytics and behavioral pattern recognition.",
+                "Cloud-native applications leverage serverless functions for enhanced performance and cost optimization.",
+                "API-first development approach ensures seamless integration across distributed systems and third-party services.",
+                "DevOps methodology streamlines development lifecycle with infrastructure as code and monitoring solutions.",
+                "Blockchain technology provides decentralized consensus mechanisms for transparent and immutable data storage."
+            ],
+            zombie: [
+                "Zombie ipsum reversus ab viral inferno, nam rick grimes malum cerebro.",
+                "De carne lumbering animata corpora quaeritis, summus brains sit​​, morbo vel maleficia?",
+                "Hi mindless mortuis soulless creaturas, imo evil stalking monstra adventus.",
+                "Qui animated corpse, cricket bat max brucks terribilem incessu zomby.",
+                "The voodoo sacerdos flesh eater, suscitat mortuos comedere carnem virus.",
+                "Zonbi tattered for solum oculi eorum defunctis go lum cerebro viral."
+            ]
+        };
+        
+        const wordBanks = {
+            classic: ["lorem", "ipsum", "dolor", "sit", "amet", "consectetur", "adipiscing", "elit", "sed", "do", "eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore", "magna", "aliqua", "enim", "ad", "minim", "veniam", "quis", "nostrud", "exercitation", "ullamco", "laboris", "nisi", "aliquip", "ex", "ea", "commodo", "consequat", "duis", "aute", "irure", "reprehenderit", "voluptate", "velit", "esse", "cillum", "fugiat", "nulla", "pariatur", "excepteur", "sint", "occaecat", "cupidatat", "non", "proident", "sunt", "culpa", "qui", "officia", "deserunt", "mollit", "anim", "id", "est", "laborum"],
+            hipster: ["artisan", "craft", "sustainable", "organic", "locavore", "authentic", "vintage", "fixie", "kale", "quinoa", "sriracha", "brooklyn", "beard", "kombucha", "gluten-free", "mindfulness", "meditation", "cold-pressed", "small-batch", "curated", "minimalist", "aesthetic"]
+        };
+        
+        // DOM elements
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const generateBtn = document.getElementById('generate-btn');
+        const copyBtn = document.getElementById('copy-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const amountSlider = document.getElementById('amount-slider');
+        const amountDisplay = document.getElementById('amount-display');
+        const outputContainer = document.getElementById('output-container');
+        const emptyState = document.getElementById('empty-state');
+        const generatedOutput = document.getElementById('generated-output');
+        const wordCount = document.getElementById('word-count');
+        const charCount = document.getElementById('char-count');
+        const historyContainer = document.getElementById('history-container');
+        const historyEmpty = document.getElementById('history-empty');
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+        
+        // Options
+        const startLorem = document.getElementById('start-lorem');
+        const htmlTags = document.getElementById('html-tags');
+        const randomLength = document.getElementById('random-length');
+        
+        // State
+        let currentType = 'paragraphs';
+        let currentVariant = 'classic';
+        let generationHistory = [];
+        
+        // Mobile menu functionality
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        });
+        
+        overlay.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        });
+        
+        // Tab functionality
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+                currentType = button.dataset.type;
+                
+                // Update slider max based on type
+                const maxValues = { paragraphs: 20, words: 500, sentences: 50, lists: 30 };
+                amountSlider.max = maxValues[currentType];
+                
+                if (parseInt(amountSlider.value) > maxValues[currentType]) {
+                    amountSlider.value = maxValues[currentType];
+                    amountDisplay.textContent = maxValues[currentType];
+                }
+            });
+        });
+        
+        // Amount slider
+        amountSlider.addEventListener('input', (e) => {
+            amountDisplay.textContent = e.target.value;
+            amountDisplay.classList.add('word-count-animation');
+            setTimeout(() => amountDisplay.classList.remove('word-count-animation'), 500);
+        });
+        
+        // Variant selection
+        document.querySelectorAll('.variant-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('selected'));
+                button.classList.add('selected');
+                currentVariant = button.dataset.variant;
+            });
+        });
+        
+        // Quick generation buttons
+        document.querySelectorAll('.quick-gen-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const type = button.dataset.type;
+                const count = parseInt(button.dataset.count);
+                
+                // Update UI to match quick selection
+                document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                document.querySelector(`[data-type="${type}"]`).classList.add('active');
+                currentType = type;
+                amountSlider.value = count;
+                amountDisplay.textContent = count;
+                
+                // Generate immediately
+                generateText();
+            });
+        });
+        
+        // Text generation functions
+        function getRandomWords(count, variant = 'classic') {
+            const words = wordBanks[variant] || wordBanks.classic;
+            const result = [];
+            
+            for (let i = 0; i < count; i++) {
+                result.push(words[Math.floor(Math.random() * words.length)]);
+            }
+            
+            return result.join(' ');
+        }
+        
+        function getRandomSentence(variant = 'classic', length = null) {
+            const sentences = loremTexts[variant] || loremTexts.classic;
+            let sentence = sentences[Math.floor(Math.random() * sentences.length)];
+            
+            if (length && randomLength.checked) {
+                const words = sentence.split(' ');
+                const targetLength = Math.floor(length * (0.7 + Math.random() * 0.6)); // 70%-130% of target
+                if (words.length > targetLength) {
+                    sentence = words.slice(0, targetLength).join(' ') + '.';
+                }
+            }
+            
+            return sentence;
+        }
+        
+        function generateParagraphs(count) {
+            const paragraphs = [];
+            
+            for (let i = 0; i < count; i++) {
+                const sentenceCount = randomLength.checked ? 
+                    Math.floor(3 + Math.random() * 5) : // 3-7 sentences
+                    Math.floor(4 + Math.random() * 3);   // 4-6 sentences
+                
+                const sentences = [];
+                
+                for (let j = 0; j < sentenceCount; j++) {
+                    if (i === 0 && j === 0 && startLorem.checked) {
+                        sentences.push("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+                    } else {
+                        sentences.push(getRandomSentence(currentVariant));
+                    }
+                }
+                
+                let paragraph = sentences.join(' ');
+                
+                if (htmlTags.checked) {
+                    paragraph = `<p>${paragraph}</p>`;
+                }
+                
+                paragraphs.push(paragraph);
+            }
+            
+            return paragraphs.join(htmlTags.checked ? '\n\n' : '\n\n');
+        }
+        
+        function generateWords(count) {
+            let result = '';
+            
+            if (startLorem.checked) {
+                result = "Lorem ipsum dolor sit amet consectetur adipiscing elit ";
+                count = Math.max(0, count - 9); // Subtract the lorem ipsum words
+            }
+            
+            if (count > 0) {
+                result += getRandomWords(count, currentVariant);
+            }
+            
+            return result.trim();
+        }
+        
+        function generateSentences(count) {
+            const sentences = [];
+            
+            for (let i = 0; i < count; i++) {
+                if (i === 0 && startLorem.checked) {
+                    sentences.push("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
+                } else {
+                    sentences.push(getRandomSentence(currentVariant));
+                }
+            }
+            
+            return sentences.join(' ');
+        }
+        
+        function generateLists(count) {
+            const items = [];
+            
+            for (let i = 0; i < count; i++) {
+                const sentence = getRandomSentence(currentVariant);
+                const shortSentence = sentence.split(',')[0] || sentence.split('.')[0];
+                
+                if (htmlTags.checked) {
+                    items.push(`<li>${shortSentence}</li>`);
+                } else {
+                    items.push(`• ${shortSentence}`);
+                }
+            }
+            
+            if (htmlTags.checked) {
+                return `<ul>\n${items.join('\n')}\n</ul>`;
+            } else {
+                return items.join('\n');
+            }
+        }
+        
+        function generateText() {
+            const amount = parseInt(amountSlider.value);
+            let text = '';
+            
+            switch (currentType) {
+                case 'paragraphs':
+                    text = generateParagraphs(amount);
+                    break;
+                case 'words':
+                    text = generateWords(amount);
+                    break;
+                case 'sentences':
+                    text = generateSentences(amount);
+                    break;
+                case 'lists':
+                    text = generateLists(amount);
+                    break;
+            }
+            
+            displayText(text);
+            updateStats(text);
+            addToHistory(text, currentType, amount, currentVariant);
+        }
+        
+        function displayText(text) {
+            emptyState.classList.add('hidden');
+            generatedOutput.classList.remove('hidden');
+            
+            if (htmlTags.checked) {
+                generatedOutput.innerHTML = text;
+            } else {
+                generatedOutput.textContent = text;
+            }
+            
+            // Smooth scroll to output
+            outputContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        function updateStats(text) {
+            const plainText = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+            const words = plainText ? plainText.split(' ').length : 0;
+            const chars = plainText.length;
+            
+            wordCount.textContent = words;
+            charCount.textContent = chars;
+            
+            wordCount.classList.add('word-count-animation');
+            charCount.classList.add('word-count-animation');
+            
+            setTimeout(() => {
+                wordCount.classList.remove('word-count-animation');
+                charCount.classList.remove('word-count-animation');
+            }, 500);
+        }
+        
+        function addToHistory(text, type, amount, variant) {
+            const historyItem = {
+                id: Date.now(),
+                text: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
+                fullText: text,
+                type,
+                amount,
+                variant,
+                timestamp: new Date().toLocaleTimeString()
+            };
+            
+            generationHistory.unshift(historyItem);
+            
+            // Keep only last 10 items
+            if (generationHistory.length > 10) {
+                generationHistory = generationHistory.slice(0, 10);
+            }
+            
+            updateHistoryDisplay();
+        }
+        
+        function updateHistoryDisplay() {
+            if (generationHistory.length === 0) {
+                historyEmpty.classList.remove('hidden');
+                return;
+            }
+            
+            historyEmpty.classList.add('hidden');
+            
+            const historyHTML = generationHistory.map(item => `
+                <div class="history-item p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-purple-300 cursor-pointer transition-all" data-id="${item.id}">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-xs font-medium text-purple-600">${item.amount} ${item.type} • ${item.variant}</span>
+                        <span class="text-xs text-gray-500">${item.timestamp}</span>
+                    </div>
+                    <div class="text-sm text-gray-700 truncate">${item.text}</div>
+                </div>
+            `).join('');
+            
+            historyContainer.innerHTML = historyHTML;
+            
+            // Add click handlers to history items
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const id = parseInt(item.dataset.id);
+                    const historyItem = generationHistory.find(h => h.id === id);
+                    if (historyItem) {
+                        displayText(historyItem.fullText);
+                        updateStats(historyItem.fullText);
+                    }
+                });
+            });
+        }
+        
+        // Event listeners
+        generateBtn.addEventListener('click', () => {
+            generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generating...';
+            generateBtn.disabled = true;
+            
+            setTimeout(() => {
+                generateText();
+                generateBtn.innerHTML = '<i class="fas fa-magic mr-2"></i>Generate Lorem Ipsum';
+                generateBtn.disabled = false;
+            }, 300);
+        });
+        
+        copyBtn.addEventListener('click', async () => {
+            const textToCopy = htmlTags.checked ? 
+                generatedOutput.innerHTML : 
+                generatedOutput.textContent;
+            
+            try {
+                await navigator.clipboard.writeText(textToCopy);
+                
+                copyBtn.innerHTML = '<i class="fas fa-check mr-2"></i>Copied!';
+                copyBtn.classList.add('copy-success');
+                
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-copy mr-2"></i>Copy';
+                    copyBtn.classList.remove('copy-success');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy to clipboard:', err);
+            }
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            generatedOutput.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+            wordCount.textContent = '0';
+            charCount.textContent = '0';
+        });
+        
+        clearHistoryBtn.addEventListener('click', () => {
+            generationHistory = [];
+            updateHistoryDisplay();
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 'Enter':
+                        e.preventDefault();
+                        generateBtn.click();
+                        break;
+                    case 'c':
+                        if (e.shiftKey) {
+                            e.preventDefault();
+                            copyBtn.click();
+                        }
+                        break;
+                    case 'k':
+                        e.preventDefault();
+                        clearBtn.click();
+                        break;
+                }
+            }
+        });
+        
+        // Initialize
+        document.querySelector('.variant-btn').classList.add('selected');
+        updateHistoryDisplay();
+        
+        // Add focus management for accessibility
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                document.body.classList.add('user-is-tabbing');
+            }
+        });
+        
+        document.addEventListener('mousedown', function() {
+            document.body.classList.remove('user-is-tabbing');
+        });
+        
+        // Add focus styles
+        const focusStyle = document.createElement('style');
+        focusStyle.textContent = `
+            .user-is-tabbing *:focus {
+                outline: 3px solid #667eea !important;
+                outline-offset: 2px !important;
+            }
+            
+            :not(.user-is-tabbing) *:focus {
+                outline: none !important;
+            }
+        `;
+        document.head.appendChild(focusStyle);
+        
+        // Auto-generate sample on page load
+        setTimeout(() => {
+            document.querySelector('[data-type="paragraphs"][data-count="3"]').click();
+        }, 1000);
+    </script>
+</body>
+</html>

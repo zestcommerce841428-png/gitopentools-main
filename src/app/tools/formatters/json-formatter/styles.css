@@ -1,0 +1,54 @@
+.json-container {
+    position: relative;
+    min-height: 300px;
+}
+
+.json-textarea {
+    font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+    resize: none;
+    min-height: 300px;
+}
+
+.json-preview {
+    font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+    white-space: pre;
+    overflow: auto;
+    min-height: 300px;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.json-key {
+    color: #881391;
+}
+
+.json-string {
+    color: #c41a16;
+}
+
+.json-number {
+    color: #1c00cf;
+}
+
+.json-boolean {
+    color: #0d22aa;
+}
+
+.json-null {
+    color: #808080;
+}
+
+.error-message {
+    background-color: #fee2e2;
+    border-left: 4px solid #ef4444;
+}
+
+.format-option {
+    transition: all 0.2s ease;
+}
+
+.format-option:hover {
+    background-color: rgba(102, 126, 234, 0.1);
+}

@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Date Time Tool - Dev Tools</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tool-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-menu-item {
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-menu-item:hover {
+            transform: translateX(4px);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .sidebar-menu-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .sidebar-menu-item.active i {
+            color: white;
+        }
+
+        .code-output {
+            font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .floating-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.1;
+            }
+
+            90% {
+                opacity: 0.1;
+            }
+
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 100;
+        }
+
+        .copy-success {
+            animation: copySuccess 2s ease-in-out;
+        }
+
+        @keyframes copySuccess {
+            0% {
+                background-color: #10b981;
+            }
+
+            100% {
+                background-color: #6366f1;
+            }
+        }
+
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-mobile {
+                transform: translateX(-100%);
+            }
+
+            .sidebar-mobile.open {
+                transform: translateX(0);
+            }
+        }
+
+        /* Date Time Tool Specific Styles */
+        .datetime-tab {
+            transition: all 0.3s ease;
+        }
+
+        .datetime-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .datetime-result {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .timezone-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Floating Background Elements -->
+    <div class="floating-elements">
+        <div class="floating-element gradient-bg w-20 h-20 rounded-full" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-element gradient-bg w-12 h-12 rounded-full" style="left: 20%; animation-delay: 5s;"></div>
+        <div class="floating-element gradient-bg w-16 h-16 rounded-full" style="left: 30%; animation-delay: 10s;"></div>
+        <div class="floating-element gradient-bg w-8 h-8 rounded-full" style="left: 40%; animation-delay: 15s;"></div>
+        <div class="floating-element gradient-bg w-24 h-24 rounded-full" style="left: 60%; animation-delay: 3s;"></div>
+        <div class="floating-element gradient-bg w-14 h-14 rounded-full" style="left: 70%; animation-delay: 8s;"></div>
+        <div class="floating-element gradient-bg w-10 h-10 rounded-full" style="left: 80%; animation-delay: 12s;"></div>
+        <div class="floating-element gradient-bg w-18 h-18 rounded-full" style="left: 90%; animation-delay: 7s;"></div>
+    </div>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg sidebar-transition fixed md:relative z-20 h-full sidebar-mobile"
+            id="sidebar">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center">
+                        <i class="fas fa-code text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold gradient-text">Dev Tools</h1>
+                        <p class="text-xs text-gray-500">45+ Developer Utilities</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="p-4">
+                <div class="relative">
+                    <input type="text" placeholder="Search tools..."
+                        class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        id="toolSearch">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- Menu Categories -->
+            <nav class="flex-1 overflow-y-auto custom-scrollbar">
+                <!-- Text Tools -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Text Tools</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-quote-right w-5 text-purple-500 mr-3"></i>
+                                Text Escape
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-text-width w-5 text-purple-500 mr-3"></i>
+                                Case Converter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-paragraph w-5 text-purple-500 mr-3"></i>
+                                Lorem Ipsum
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-align-left w-5 text-purple-500 mr-3"></i>
+                                Text Formatter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Formatters -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Formatters</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-code w-5 text-purple-500 mr-3"></i>
+                                JSON Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-file-code w-5 text-purple-500 mr-3"></i>
+                                XML Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-database w-5 text-purple-500 mr-3"></i>
+                                SQL Formatter
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fab fa-css3-alt w-5 text-purple-500 mr-3"></i>
+                                CSS Formatter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Generators -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Generators</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-lock w-5 text-purple-500 mr-3"></i>
+                                Password Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-fingerprint w-5 text-purple-500 mr-3"></i>
+                                UUID Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-palette w-5 text-purple-500 mr-3"></i>
+                                Color Generator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Converters -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Converters</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-exchange-alt w-5 text-purple-500 mr-3"></i>
+                                Base64 Encoder
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-clock w-5 text-purple-500 mr-3"></i>
+                                UNIX Timestamp
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-hashtag w-5 text-purple-500 mr-3"></i>
+                                Hash Generator
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item active flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-calendar-alt w-5 text-purple-500 mr-3"></i>
+                                Date Time Tool
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Testers -->
+                <div class="px-4 py-2">
+                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Testers</h3>
+                    <ul class="space-y-1">
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-search w-5 text-purple-500 mr-3"></i>
+                                Regex Tester
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#"
+                                class="sidebar-menu-item flex items-center px-3 py-2 text-sm text-gray-700 rounded-lg">
+                                <i class="fas fa-link w-5 text-purple-500 mr-3"></i>
+                                URL Validator
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Mobile Sidebar Overlay -->
+        <div class="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden hidden" id="sidebarOverlay"></div>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button class="md:hidden text-gray-600 hover:text-purple-600" id="sidebarToggle">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">Date Time Tool</h2>
+                            <p class="text-sm text-gray-500">Convert, calculate and format dates and times
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button class="text-gray-600 hover:text-purple-600 transition-colors"
+                            onclick="window.location.href='#'">
+                            <i class="fas fa-home text-lg"></i>
+                        </button>
+                        <button class="text-gray-600 hover:text-purple-600 transition-colors" onclick="shareURL()">
+                            <i class="fas fa-share-alt text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tool Content -->
+            <div class="flex-1 overflow-auto p-6 space-y-6">
+                <!-- Tool Description -->
+                <div class="tool-card rounded-xl p-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-12 h-12 gradient-bg rounded-xl flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-calendar-alt text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Date Time Tool</h3>
+                            <p class="text-gray-600 leading-relaxed">
+                                A comprehensive date and time utility that allows you to convert between different date formats, calculate date differences, work with time zones, and generate timestamps. Perfect for developers working with date/time manipulation in their applications.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tool Interface -->
+                <div class="tool-card rounded-xl p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <button class="datetime-tab py-2 px-4 rounded-lg font-medium active" data-tab="converter">
+                            <i class="fas fa-exchange-alt mr-2"></i>Converter
+                        </button>
+                        <button class="datetime-tab py-2 px-4 rounded-lg font-medium" data-tab="calculator">
+                            <i class="fas fa-calculator mr-2"></i>Calculator
+                        </button>
+                        <button class="datetime-tab py-2 px-4 rounded-lg font-medium" data-tab="timezone">
+                            <i class="fas fa-globe mr-2"></i>Time Zone
+                        </button>
+                        <button class="datetime-tab py-2 px-4 rounded-lg font-medium" data-tab="formats">
+                            <i class="fas fa-list mr-2"></i>Formats
+                        </button>
+                    </div>
+
+                    <!-- Converter Tab -->
+                    <div id="converter-tab" class="tab-content">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-medium text-gray-700 mb-3">Input</h4>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                        <input type="datetime-local" id="dateInput" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Timestamp</label>
+                                        <input type="number" id="timestampInput" placeholder="Unix timestamp" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    </div>
+                                    <button onclick="convertDateTime()" class="w-full gradient-bg text-white py-2 px-4 rounded-lg font-medium hover:opacity-90 transition-opacity">
+                                        Convert
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-700 mb-3">Results</h4>
+                                <div class="space-y-4 datetime-result">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Human Readable</label>
+                                        <div class="p-3 bg-gray-50 rounded" id="humanReadableResult">-</div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">ISO 8601</label>
+                                        <div class="p-3 bg-gray-50 rounded" id="isoResult">-</div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">UTC</label>
+                                        <div class="p-3 bg-gray-50 rounded" id="utcResult">-</div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Unix Timestamp</label>
+                                        <div class="p-3 bg-gray-50 rounded" id="timestampResult">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calculator Tab -->
+                    <div id="calculator-tab" class="tab-content hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-medium text-gray-700 mb-3">Calculate Date Difference</h4>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+                                        <input type="datetime-local" id="fromDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+                                        <input type="datetime-local" id="toDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    </div>
+                                    <button onclick="calculateDateDifference()" class="w-full gradient-bg text-white py-2 px-4 rounded-lg font-medium hover:opacity-90 transition-opacity">
+                                        Calculate Difference
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-700 mb-3">Result</h4>
+                                <div class="datetime-result p-4">
+                                    <div id="dateDifferenceResult" class="text-center py-8">The result will appear here</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <h4 class="font-medium text-gray-700 mb-3">Add/Subtract Time</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Base Date</label>
+                                    <input type="datetime-local" id="baseDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Operation</label>
+                                    <select id="timeOperation" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                        <option value="add">Add</option>
+                                        <option value="subtract">Subtract</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Time Amount</label>
+                                    <div class="flex space-x-2">
+                                        <input type="number" id="timeValue" placeholder="Value" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                        <select id="timeUnit" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                            <option value="seconds">Seconds</option>
+                                            <option value="minutes">Minutes</option>
+                                            <option value="hours">Hours</option>
+                                            <option value="days">Days</option>
+                                            <option value="weeks">Weeks</option>
+                                            <option value="months">Months</option>
+                                            <option value="years">Years</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="calculateTimeOperation()" class="mt-4 w-full gradient-bg text-white py-2 px-4 rounded-lg font-medium hover:opacity-90 transition-opacity">
+                                Calculate
+                            </button>
+                            <div class="mt-4 datetime-result p-4">
+                                <div id="timeOperationResult" class="text-center py-4">The result will appear here</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timezone Tab -->
+                    <div id="timezone-tab" class="tab-content hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-medium text-gray-700 mb-3">Convert Time Zone</h4>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Date & Time</label>
+                                        <input type="datetime-local" id="timezoneDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">From Time Zone</label>
+                                        <select id="fromTimezone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent timezone-select">
+                                            <option value="UTC">UTC</option>
+                                            <option value="America/New_York">EST (New York)</option>
+                                            <option value="America/Chicago">CST (Chicago)</option>
+                                            <option value="America/Denver">MST (Denver)</option>
+                                            <option value="America/Los_Angeles">PST (Los Angeles)</option>
+                                            <option value="Europe/London">GMT (London)</option>
+                                            <option value="Europe/Paris">CET (Paris)</option>
+                                            <option value="Asia/Tokyo">JST (Tokyo)</option>
+                                            <option value="Asia/Shanghai">CST (Shanghai)</option>
+                                            <option value="Australia/Sydney">AEST (Sydney)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">To Time Zone</label>
+                                        <select id="toTimezone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent timezone-select">
+                                            <option value="UTC">UTC</option>
+                                            <option value="America/New_York">EST (New York)</option>
+                                            <option value="America/Chicago">CST (Chicago)</option>
+                                            <option value="America/Denver">MST (Denver)</option>
+                                            <option value="America/Los_Angeles">PST (Los Angeles)</option>
+                                            <option value="Europe/London">GMT (London)</option>
+                                            <option value="Europe/Paris">CET (Paris)</option>
+                                            <option value="Asia/Tokyo">JST (Tokyo)</option>
+                                            <option value="Asia/Shanghai">CST (Shanghai)</option>
+                                            <option value="Australia/Sydney" selected>AEST (Sydney)</option>
+                                        </select>
+                                    </div>
+                                    <button onclick="convertTimezone()" class="w-full gradient-bg text-white py-2 px-4 rounded-lg font-medium hover:opacity-90 transition-opacity">
+                                        Convert Timezone
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-700 mb-3">Result</h4>
+                                <div class="datetime-result p-4">
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Original Time</label>
+                                        <div class="p-3 bg-gray-50 rounded" id="originalTime">-</div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Converted Time</label>
+                                        <div class="p-3 bg-gray-50 rounded" id="convertedTime">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <h4 class="font-medium text-gray-700 mb-3">Current Time in Different Time Zones</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="currentTimes">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formats Tab -->
+                    <div id="formats-tab" class="tab-content hidden">
+                        <h4 class="font-medium text-gray-700 mb-3">Common Date Format Examples</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Format Name</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Example</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Format String</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">ISO 8601</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" id="isoExample"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">YYYY-MM-DDTHH:mm:ss.sssZ</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">HTTP Date</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" id="httpExample"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">ddd, DD MMM YYYY HH:mm:ss GMT</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Unix Timestamp</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" id="unixExample"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Seconds since Jan 01 1970</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">RFC 2822</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" id="rfc2822Example"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">ddd, DD MMM YYYY HH:mm:ss +ZZZZ</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Human Readable</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" id="humanExample"></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">MMMM DD, YYYY at hh:mm A</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <h4 class="font-medium text-gray-700 mb-3">Custom Format Generator</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                        <input type="datetime-local" id="formatDate" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Format String</label>
+                                        <input type="text" id="formatString" placeholder="YYYY-MM-DD" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                        <p class="text-xs text-gray-500 mt-1">Use tokens like YYYY, MM, DD, HH, mm, ss</p>
+                                    </div>
+                                    <button onclick="generateCustomFormat()" class="w-full gradient-bg text-white py-2 px-4 rounded-lg font-medium hover:opacity-90 transition-opacity">
+                                        Generate
+                                    </button>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-700 mb-3">Result</h4>
+                                    <div class="datetime-result p-4">
+                                        <div id="customFormatResult" class="text-center py-8">Your formatted date will appear here</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize the page with current date/time
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current date/time to inputs
+            const now = new Date();
+            const localDateTime = now.toISOString().slice(0, 16);
+            
+            document.getElementById('dateInput').value = localDateTime;
+            document.getElementById('fromDate').value = localDateTime;
+            document.getElementById('toDate').value = localDateTime;
+            document.getElementById('baseDate').value = localDateTime;
+            document.getElementById('timezoneDate').value = localDateTime;
+            document.getElementById('formatDate').value = localDateTime;
+            
+            // Set timestamp input to current timestamp
+            document.getElementById('timestampInput').value = Math.floor(now.getTime() / 1000);
+            
+            // Initialize format examples
+            updateFormatExamples();
+            
+            // Initialize current times in different timezones
+            updateCurrentTimes();
+            
+            // Set up tab switching
+            document.querySelectorAll('.datetime-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    document.querySelectorAll('.datetime-tab').forEach(t => {
+                        t.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Hide all tab contents
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    // Show the selected tab content
+                    const tabName = this.getAttribute('data-tab');
+                    document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+                });
+            });
+        });
+
+        // Convert between date formats
+        function convertDateTime() {
+            const dateInput = document.getElementById('dateInput').value;
+            const timestampInput = document.getElementById('timestampInput').value;
+            
+            let date;
+            
+            if (dateInput) {
+                date = new Date(dateInput);
+            } else if (timestampInput) {
+                date = new Date(parseInt(timestampInput) * 1000);
+            } else {
+                alert('Please enter a date or timestamp');
+                return;
+            }
+            
+            // Update results
+            document.getElementById('humanReadableResult').textContent = date.toLocaleString();
+            document.getElementById('isoResult').textContent = date.toISOString();
+            document.getElementById('utcResult').textContent = date.toUTCString();
+            document.getElementById('timestampResult').textContent = Math.floor(date.getTime() / 1000);
+        }
+
+        // Calculate date difference
+        function calculateDateDifference() {
+            const fromDate = new Date(document.getElementById('fromDate').value);
+            const toDate = new Date(document.getElementById('toDate').value);
+            
+            if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+                alert('Please enter valid dates');
+                return;
+            }
+            
+            const diffMs = Math.abs(toDate - fromDate);
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            const diffSecs = Math.floor((diffMs % (1000 * 60)) / 1000);
+            
+            document.getElementById('dateDifferenceResult').innerHTML = `
+                <div class="text-2xl font-bold text-purple-600 mb-2">${diffDays} days, ${diffHours} hours, ${diffMins} minutes, ${diffSecs} seconds</div>
+                <div class="text-gray-600">Total milliseconds: ${diffMs.toLocaleString()}</div>
+            `;
+        }
+
+        // Add/subtract time
+        function calculateTimeOperation() {
+            const baseDate = new Date(document.getElementById('baseDate').value);
+            const operation = document.getElementById('timeOperation').value;
+            const value = parseInt(document.getElementById('timeValue').value);
+            const unit = document.getElementById('timeUnit').value;
+            
+            if (isNaN(baseDate.getTime()) || isNaN(value)) {
+                alert('Please enter valid values');
+                return;
+            }
+            
+            const resultDate = new Date(baseDate);
+            
+            switch(unit) {
+                case 'seconds':
+                    operation === 'add' 
+                        ? resultDate.setSeconds(resultDate.getSeconds() + value)
+                        : resultDate.setSeconds(resultDate.getSeconds() - value);
+                    break;
+                case 'minutes':
+                    operation === 'add' 
+                        ? resultDate.setMinutes(resultDate.getMinutes() + value)
+                        : resultDate.setMinutes(resultDate.getMinutes() - value);
+                    break;
+                case 'hours':
+                    operation === 'add' 
+                        ? resultDate.setHours(resultDate.getHours() + value)
+                        : resultDate.setHours(resultDate.getHours() - value);
+                    break;
+                case 'days':
+                    operation === 'add' 
+                        ? resultDate.setDate(resultDate.getDate() + value)
+                        : resultDate.setDate(resultDate.getDate() - value);
+                    break;
+                case 'weeks':
+                    operation === 'add' 
+                        ? resultDate.setDate(resultDate.getDate() + (value * 7))
+                        : resultDate.setDate(resultDate.getDate() - (value * 7));
+                    break;
+                case 'months':
+                    operation === 'add' 
+                        ? resultDate.setMonth(resultDate.getMonth() + value)
+                        : resultDate.setMonth(resultDate.getMonth() - value);
+                    break;
+                case 'years':
+                    operation === 'add' 
+                        ? resultDate.setFullYear(resultDate.getFullYear() + value)
+                        : resultDate.setFullYear(resultDate.getFullYear() - value);
+                    break;
+            }
+            
+            document.getElementById('timeOperationResult').innerHTML = `
+                <div class="text-lg font-semibold">${operation === 'add' ? 'Added' : 'Subtracted'} ${value} ${unit}</div>
+                <div class="text-xl font-bold text-purple-600 mt-2">${resultDate.toLocaleString()}</div>
+                <div class="text-sm text-gray-600 mt-2">ISO: ${resultDate.toISOString()}</div>
+            `;
+        }
+
+        // Convert between timezones
+        function convertTimezone() {
+            const dateTime = document.getElementById('timezoneDate').value;
+            const fromTimezone = document.getElementById('fromTimezone').value;
+            const toTimezone = document.getElementById('toTimezone').value;
+            
+            if (!dateTime) {
+                alert('Please enter a date and time');
+                return;
+            }
+            
+            // This is a simplified implementation - in a real app you would use a library like moment-timezone
+            const date = new Date(dateTime);
+            
+            // Format the original time
+            const originalTimeStr = date.toLocaleString('en-US', { 
+                timeZone: fromTimezone, 
+                timeZoneName: 'short' 
+            });
+            
+            document.getElementById('originalTime').textContent = `${originalTimeStr} (${fromTimezone})`;
+            
+            // Format the converted time
+            const convertedTimeStr = date.toLocaleString('en-US', { 
+                timeZone: toTimezone, 
+                timeZoneName: 'short' 
+            });
+            
+            document.getElementById('convertedTime').textContent = `${convertedTimeStr} (${toTimezone})`;
+        }
+
+        // Update current times in different timezones
+        function updateCurrentTimes() {
+            const timezones = [
+                { name: 'UTC', label: 'UTC' },
+                { name: 'America/New_York', label: 'New York' },
+                { name: 'America/Los_Angeles', label: 'Los Angeles' },
+                { name: 'Europe/London', label: 'London' },
+                { name: 'Europe/Paris', label: 'Paris' },
+                { name: 'Asia/Tokyo', label: 'Tokyo' },
+                { name: 'Australia/Sydney', label: 'Sydney' }
+            ];
+            
+            const now = new Date();
+            let html = '';
+            
+            timezones.forEach(tz => {
+                // This is a simplified implementation
+                const timeStr = now.toLocaleString('en-US', { 
+                    timeZone: tz.name,
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    timeZoneName: 'short'
+                });
+                
+                html += `
+                    <div class="bg-gray-50 p-3 rounded-lg">
+                        <div class="font-medium text-gray-700">${tz.label}</div>
+                        <div class="text-lg font-semibold text-purple-600">${timeStr}</div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('currentTimes').innerHTML = html;
+        }
+
+        // Update format examples
+        function updateFormatExamples() {
+            const now = new Date();
+            
+            document.getElementById('isoExample').textContent = now.toISOString();
+            document.getElementById('httpExample').textContent = now.toUTCString();
+            document.getElementById('unixExample').textContent = Math.floor(now.getTime() / 1000);
+            
+            // RFC 2822 format
+            document.getElementById('rfc2822Example').textContent = now.toUTCString().replace('GMT', '+0000');
+            
+            // Human readable format
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            document.getElementById('humanExample').textContent = now.toLocaleDateString('en-US', options) + ' at ' + now.toLocaleTimeString('en-US');
+        }
+
+        // Generate custom format
+        function generateCustomFormat() {
+            const dateTime = document.getElementById('formatDate').value;
+            const formatString = document.getElementById('formatString').value;
+            
+            if (!dateTime || !formatString) {
+                alert('Please enter both date and format string');
+                return;
+            }
+            
+            const date = new Date(dateTime);
+            
+            // Simple token replacement
+            let result = formatString
+                .replace('YYYY', date.getFullYear())
+                .replace('YY', date.getFullYear().toString().slice(-2))
+                .replace('MM', (date.getMonth() + 1).toString().padStart(2, '0'))
+                .replace('M', (date.getMonth() + 1))
+                .replace('DD', date.getDate().toString().padStart(2, '0'))
+                .replace('D', date.getDate())
+                .replace('HH', date.getHours().toString().padStart(2, '0'))
+                .replace('H', date.getHours())
+                .replace('mm', date.getMinutes().toString().padStart(2, '0'))
+                .replace('m', date.getMinutes())
+                .replace('ss', date.getSeconds().toString().padStart(2, '0'))
+                .replace('s', date.getSeconds());
+            
+            document.getElementById('customFormatResult').textContent = result;
+        }
+
+        // Mobile sidebar toggle
+        document.getElementById('sidebarToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        });
+
+        document.getElementById('sidebarOverlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+            this.classList.add('hidden');
+        });
+
+        // Tool search functionality
+        document.getElementById('toolSearch').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const menuItems = document.querySelectorAll('.sidebar-menu-item');
+            
+            menuItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.parentElement.style.display = 'block';
+                } else {
+                    item.parentElement.style.display = 'none';
+                }
+            });
+        });
+
+        // Share URL function
+        function shareURL() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Dev Tools - Date Time Tool',
+                    url: window.location.href
+                })
+                .catch(console.error);
+            } else {
+                alert('Web Share API not supported in your browser. Copy the URL manually: ' + window.location.href);
+            }
+        }
+
+        // Update current times every second
+        setInterval(updateCurrentTimes, 1000);
+    </script>
+</body>
+
+</html>

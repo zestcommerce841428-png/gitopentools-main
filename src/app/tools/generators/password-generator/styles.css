@@ -1,0 +1,165 @@
+.password-generator-container {
+  position: relative;
+}
+
+.password-display {
+  font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+  letter-spacing: 0.1em;
+  user-select: all;
+}
+
+.strength-meter {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(to right, #ef4444, #f59e0b, #10b981, #3b82f6);
+  transition: width 0.3s ease;
+}
+
+.strength-meter-fill {
+  height: 100%;
+  border-radius: 4px;
+  background-color: white;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.strength-weak {
+  width: 25%;
+}
+
+.strength-medium {
+  width: 50%;
+}
+
+.strength-strong {
+  width: 75%;
+}
+
+.strength-very-strong {
+  width: 100%;
+}
+
+.option-toggle {
+  transition: all 0.2s ease;
+}
+
+.option-toggle:hover {
+  background-color: rgba(102, 126, 234, 0.1);
+}
+
+.length-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, #667eea, #764ba2);
+  outline: none;
+}
+
+.length-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #667eea;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.length-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #667eea;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.length-input {
+  width: 70px;
+  text-align: center;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.375rem;
+  padding: 0.375rem 0.75rem;
+}
+
+.length-input:focus {
+  border-color: #667eea;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.preset-option {
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.preset-option:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+}
+
+.preset-option.active {
+  border-color: #667eea;
+  background-color: rgba(102, 126, 234, 0.05);
+}
+
+.char-set-indicator {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.char-set-uppercase {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.char-set-lowercase {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.char-set-numbers {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.char-set-symbols {
+  background-color: #fce7f3;
+  color: #db2777;
+}
+
+.advanced-options {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
